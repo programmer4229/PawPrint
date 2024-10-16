@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from './Navbar';
 import PetProfile from './PetProfile';
+import PetSelectionPage from './ProfileSelection';
 
 function SignIn() {
     const [showPetProfile, setShowPetProfile] = useState(false);
@@ -15,7 +16,7 @@ function SignIn() {
     };
 
     if (showPetProfile) {
-        return <PetProfile />;
+        return <PetSelectionPage />;
     }
 
     return (
