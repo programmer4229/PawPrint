@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Navbar from './Navbar';
 import PetProfile from './PetProfile';
 
 const PetSelectionPage = () => {
@@ -20,14 +21,11 @@ const PetSelectionPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-200">
-      <header className="bg-orange-500 text-white p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">PawPrint</h1>
-        <button className="text-2xl">☰</button>
-      </header>
+    <div className="min-h-screen bg-orange-100">
+      <Navbar />
 
       <main className="container mx-auto p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 mt-12">
           {pets.map((pet) => (
             <div key={pet.id} className="flex flex-col items-center" onClick={() => handlePetClick(pet)}>
               <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-orange-500 mb-2 cursor-pointer">
