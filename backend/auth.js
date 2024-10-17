@@ -1,5 +1,6 @@
 const { Client } = require('pg');
 const bcrypt = require('bcrypt');
+const fs = require('fs');
 
 const client = new Client({
   host: 'database-1.cd6ky6cymg3c.us-east-2.rds.amazonaws.com',
@@ -7,6 +8,10 @@ const client = new Client({
   password: 'AlmostFullAdmin07?',
   database: 'testdb',
   port: 54327,
+  ssl: {
+    rejectUnauthorized: true, // Reject unauthorized SSL certificates
+    ca: fs.readFileSync('./us-east-2-bundle.pem').toString(), // Read the downloaded certificate
+  },
 });
 
 client.connect()
