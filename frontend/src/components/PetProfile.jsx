@@ -1,8 +1,21 @@
 import React, { useState } from 'react';
 import Navbar from './Navbar';
 
-function PetProfile() {
+const PetProfile = ({ pet }) => {
   const [activeTab, setActiveTab] = useState('medical');
+
+  // Default values if pet data is missing
+  const defaultPet = {
+    name: 'Unknown Pet',
+    image: '/placeholder.svg?height=128&width=128',
+    chipId: 'N/A',
+    type: 'Unknown',
+    breed: 'Unknown',
+    age: 'N/A'
+  };
+
+  // Use the provided pet data or fall back to default values
+  const petData = pet || defaultPet;
 
   return (
     <div className="min-h-screen bg-orange-100">
@@ -19,13 +32,15 @@ function PetProfile() {
           <div className="flex flex-col items-center mb-6">
             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-orange-500 mb-4">
               <img
-                src="/placeholder.svg?height=128&width=128"
-                alt=""
+                src={petData.image}
+                alt={petData.name}
                 className="w-full h-full object-cover"
               />
             </div>
-            <h2 className="text-2xl font-bold">Diesel</h2>
-            <p className="text-gray-600">Chip ID: 1234567 | Border Collie | Age: 9</p>
+            <h2 className="text-2xl font-bold">{petData.name}</h2>
+            <p className="text-gray-600">
+              Chip ID: {petData.chipId} | {petData.breed || petData.type} | Age: {petData.age}
+            </p>
           </div>
 
           <div className="mb-6">
@@ -104,14 +119,14 @@ function PetProfile() {
           {activeTab === 'nutrition' && (
             <div>
               <h3 className="text-lg font-semibold mb-2">Nutrition Information</h3>
-              <p>Nutrition details and diet plans will be displayed here.</p>
+              <p>Nutrition details and diet plans for {petData.name} will be displayed here.</p>
             </div>
           )}
 
           {activeTab === 'services' && (
             <div>
               <h3 className="text-lg font-semibold mb-2">Services</h3>
-              <p>Information about pet services and appointments will be shown here.</p>
+              <p>Information about pet services and appointments for {petData.name} will be shown here.</p>
             </div>
           )}
         </div>

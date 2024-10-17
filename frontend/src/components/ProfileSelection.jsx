@@ -7,9 +7,9 @@ const PetSelectionPage = () => {
 
   // Mock data for pets (this would eventually come from database)
   const pets = [
-    { id: 1, name: 'Diesel', image: '/placeholder.svg?height=100&width=100', type: 'dog' },
-    { id: 2, name: 'Daisy', image: '/placeholder.svg?height=100&width=100', type: 'cat' },
-    { id: 3, name: 'Derek', image: '/placeholder.svg?height=100&width=100', type: 'hamster' },
+    { id: 1, name: 'Diesel', image: '/placeholder.svg?height=100&width=100', type: 'dog', age: 8 },
+    { id: 2, name: 'Daisy', image: '/placeholder.svg?height=100&width=100', type: 'cat', age:12 },
+    { id: 3, name: 'Derek', image: '/placeholder.svg?height=100&width=100', type: 'hamster', age: 14 },
   ];
 
   const handlePetClick = (pet) => {
