@@ -1,7 +1,8 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const User = require('./Users');
 
-const Cat = sequelize.define('Cat', {
+const Pet = sequelize.define('Pet', {
     id: {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4,
@@ -11,27 +12,7 @@ const Cat = sequelize.define('Cat', {
         type: DataTypes.STRING,
         allowNull: false,
     },
-    breed: {
-        type: DataTypes.STRING,
-        allowNull: true
-    },
-    dateOfBirth: {
-        type: DataTypes.DATEONLY,
-        allowNull: false
-    },
-    ownerId: {
-        type: DataTypes.UUID,
-        allowNull: true,
-    },
-});
-
-const Dog = sequelize.define('Dog', {
-    id: {
-        type: DataTypes.UUID,
-        defaultValue: DataTypes.UUIDV4,
-        primaryKey: true,
-    },
-    name: {
+    type: {
         type: DataTypes.STRING,
         allowNull: false,
     },
@@ -48,10 +29,11 @@ const Dog = sequelize.define('Dog', {
         allowNull: true,
     },
     careInstructions: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING(1234),
     }
 });
 
+Pet.belongsTo(User, { foreignKey: 'ownerId' });
+User.hasMany(Pet, { foreignKey: 'ownerId' });
 
-module.exports = Cat;
-module.exports = Dog;
+module.exports = { Pet };
