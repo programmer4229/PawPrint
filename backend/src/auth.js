@@ -21,10 +21,11 @@ client.connect()
 async function registerUser(username, password) {
   try {
     const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
     const passwordHash = await bcrypt.hash(password, saltRounds);
 
-    const query = 'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id';
-    const values = [username, passwordHash];
+    const query = 'INSERT INTO "Owners" ("username", "email", "salt", "passhash") VALUES ($1, $2, $3, $4) RETURNING "id"';
+    const values = [username, email, salt, passwordHash];    
 
     const res = await client.query(query, values);
     console.log('User registered with ID:', res.rows[0].id);
@@ -35,19 +36,26 @@ async function registerUser(username, password) {
 
 async function loginUser(username, password) {
     try {
-      const query = 'SELECT password_hash FROM users WHERE username = $1';
+      console.log('Inside auth.js/loginUser')
+      const query = 'SELECT "passhash" FROM "Owners" WHERE "username" = $1';
+      console.log(query)
       const values = [username];
+      console.log(values)
   
       const res = await client.query(query, values);
+      console.log(res)
   
       if (res.rows.length === 0) {
         console.log('User not found');
         return false;
       }
   
-      const passwordHash = res.rows[0].password_hash;
+      const passwordHash = res.rows[0].passhash;
+      console.log(passwordHash)
+      console.log(password)
   
-      const isMatch = await bcrypt.compare(password, passwordHash);
+      // const isMatch = await bcrypt.compare(password, passwordHash);
+      const isMatch = password === passwordHash;  // test value
   
       if (isMatch) {
         console.log('Login successful');
