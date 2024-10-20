@@ -7,9 +7,24 @@ const PetSelectionPage = () => {
 
   // Mock data for pets (this would eventually come from database)
   const pets = [
-    { id: 1, name: 'Diesel', image: '/placeholder.svg?height=100&width=100', type: 'dog', age: 8 },
-    { id: 2, name: 'Daisy', image: '/placeholder.svg?height=100&width=100', type: 'cat', age:12 },
-    { id: 3, name: 'Derek', image: '/placeholder.svg?height=100&width=100', type: 'hamster', age: 14 },
+    { id: 1, name: 'Diesel', image: '/placeholder.svg?height=100&width=100', type: 'dog', age: 8, weightData: [
+        { date: '2023-05-01', weight: 50 },
+        { date: '2023-05-15', weight: 55 },
+        { date: '2023-06-01', weight: 52 },
+        { date: '2023-06-15', weight: 57 }
+      ]},
+    { id: 2, name: 'Daisy', image: '/placeholder.svg?height=100&width=100', type: 'cat', age:12, weightData: [
+        { date: '2023-05-01', weight: 50 },
+        { date: '2023-05-15', weight: 55 },
+        { date: '2023-06-01', weight: 52 },
+        { date: '2023-06-15', weight: 57 }
+      ]},
+    { id: 3, name: 'Derek', image: '/placeholder.svg?height=100&width=100', type: 'hamster', age: 14, weightData: [
+        { date: '2023-05-01', weight: 50 },
+        { date: '2023-05-15', weight: 55 },
+        { date: '2023-06-01', weight: 52 },
+        { date: '2023-06-15', weight: 57 }
+      ]},
   ];
 
   const handlePetClick = (pet) => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Navbar from './Navbar';
+import NutritionTab from './NutritionTab';
 
 const PetProfile = ({ pet }) => {
   const [activeTab, setActiveTab] = useState('medical');
@@ -16,6 +17,16 @@ const PetProfile = ({ pet }) => {
 
   // Use the provided pet data or fall back to default values
   const petData = pet || defaultPet;
+
+  const [selectedPet, setPet] = useState(petData);
+
+  // Function to update pet's weight data
+  const updatePetWeight = (updatedWeightData) => {
+    setPet((prevPet) => ({
+      ...prevPet,
+      weightData: updatedWeightData,
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-orange-100">
@@ -119,7 +130,7 @@ const PetProfile = ({ pet }) => {
           {activeTab === 'nutrition' && (
             <div>
               <h3 className="text-lg font-semibold mb-2">Nutrition Information</h3>
-              <p>Nutrition details and diet plans for {petData.name} will be displayed here.</p>
+              <NutritionTab pet={selectedPet} updatePetWeight={updatePetWeight}/>
             </div>
           )}
 
