@@ -1,15 +1,11 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const Navbar = ({ onNavigate }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
-  };
-
-  const handleNavigation = (destination) => {
-    onNavigate(destination);
-    setIsMenuOpen(false);
   };
 
   return (
@@ -42,18 +38,16 @@ const Navbar = ({ onNavigate }) => {
 
       {isMenuOpen && (
         <div className="absolute top-16 right-0 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-          <button
-            onClick={() => handleNavigation('petProfiles')}
+          <div
             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 hover:text-orange-900"
           >
-            Pet Profiles
-          </button>
-          <button
-            onClick={() => handleNavigation('signOut')}
+            <Link to='/petselection'>Pet Profiles</Link>
+          </div>
+          <div
             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 hover:text-orange-900"
           >
-            Sign Out
-          </button>
+            <Link to='/signin'>Sign Out</Link>
+          </div>
         </div>
       )}
     </nav>
