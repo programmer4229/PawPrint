@@ -2,22 +2,45 @@ import React, { useState } from 'react';
 import Navbar from './Navbar';
 import PetProfile from './PetProfile';
 import PetSelectionPage from './ProfileSelection';
+import { loginUser, registerUser } from '../backend/auth'; 
 
 function SignIn() {
     const [showPetProfile, setShowPetProfile] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSignIn = (e) => {
+    const handleSignIn = async (e) => {
         e.preventDefault();
-        // In a real application, you would validate the credentials here
-        // For this example, we'll just show the PetProfile
+    try {
+      const response = await loginUser({ username: email, password }); // Use email instead of username
+      console.log('Registration successful:', response);
+      if (response) {
         setShowPetProfile(true);
-    };
-
-    if (showPetProfile) {
-        return <PetSelectionPage />;
+      } else {
+        setError('Registration failed. Please try again.');
+      }
+    } catch (err) {
+      setError('Registration failed. Please try again.');
     }
+  };
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    try {
+        const response = await registerUser({ username: email, password }); // Use email instead of username
+        console.log('Registration successful:', response);
+        if (response) {
+            setShowPetProfile(true);
+        } else {
+            setError('Registration failed. Please try again.');
+        }
+    } catch (err) {
+        setError('Registration failed. Please try again.');
+    }
+};
+  if (showPetProfile) {
+    return <PetSelectionPage />;
+  }
 
     return (
         <div className="min-h-screen bg-orange-100">
