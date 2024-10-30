@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const Pet = require('./Pets');
 
@@ -20,7 +20,7 @@ const AdoptionInfo = sequelize.define('AdoptionInfo', {
         type: DataTypes.DATEONLY,
     }, 
     phoneNumber: {
-        
+        type: DataTypes.STRING,
     }
     
 
@@ -73,12 +73,6 @@ const Medication = sequelize.define('Medication', {
     }
 });
 
-Pet.hasOne(AdoptionInfo, {foreignKey: 'petId'});
-AdoptionInfo.belongsTo(Pet, {foreignKey: 'petId'});
-Pet.hasMany(Vaccination, {foreignKey: 'petId'});
-Vaccination.belongsTo(Pet, {foreignKey: 'petId'});
-Pet.hasMany(Medication, {foreignKey: 'petId'});
-Medication.belongsTo(Pet, {foreignKey: 'petId'});
 
 
 module.exports = {AdoptionInfo, Vaccination, Medication};

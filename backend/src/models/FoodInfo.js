@@ -21,8 +21,5 @@ const Meal = sequelize.define('Meal', {
     },
 });
 
-Pet.hasMany(Meal, { foreignKey: 'petId' });
-Meal.belongsTo(Pet, { foreignKey: 'petId' });
-
 
 module.exports = Meal;

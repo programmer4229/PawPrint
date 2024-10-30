@@ -3,7 +3,7 @@ const Pet = require('../models/Pets');
 async function createPet(req, res, next) {
     try {
         const pet = await Pet.create(req.body);
-        res.json(pet);
+        res.json("Pet created!");
     } catch (err) {
         res.status(500).json({ message: err.message });
     }

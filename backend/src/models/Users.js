@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const Pet = require('./Pets');
 
@@ -34,7 +34,5 @@ const User = sequelize.define('User', {
     },
 });
 
-User.hasMany(Pet, { foreignKey: 'ownerId' });
-Pet.belongsTo(User, { foreignKey: 'ownerId' });
 
 module.exports = User;

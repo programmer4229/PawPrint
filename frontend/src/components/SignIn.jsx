@@ -1,54 +1,52 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import PetProfile from './PetProfile';
 import PetSelectionPage from './ProfileSelection';
-import { loginUser, registerUser } from '../backend/auth'; 
+import { AuthContext } from '../shared/context/auth-context';
 
 function SignIn() {
-    const [showPetProfile, setShowPetProfile] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const navigate = useNavigate();
 
-    const handleSignIn = async (e) => {
+    const auth = useContext(AuthContext);
+    const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+    const login = useCallback(() => {
+        auth.login();
+    }
+    , [auth]);
+
+    const submitHandler = async (e) => {
         e.preventDefault();
-    try {
-      const response = await loginUser({ username: email, password }); // Use email instead of username
-      console.log('Registration successful:', response);
-      if (response) {
-        setShowPetProfile(true);
-      } else {
-        setError('Registration failed. Please try again.');
-      }
-    } catch (err) {
-      setError('Registration failed. Please try again.');
-    }
-  };
-
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    try {
-        const response = await registerUser({ username: email, password }); // Use email instead of username
-        console.log('Registration successful:', response);
-        if (response) {
-            setShowPetProfile(true);
-        } else {
-            setError('Registration failed. Please try again.');
+        try {
+            const response = await fetch('http://localhost:51007/users/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    password
+                })
+            });
+            const responseData = await response.json();
+            if (!response.ok) {
+                throw new Error(responseData.message);
+            }
+            console.log("Successfully Logged In");
+            login();
+            navigate('/petselection');
+        } catch (error) {
+            console.log(error);
         }
-    } catch (err) {
-        setError('Registration failed. Please try again.');
-    }
-};
-  if (showPetProfile) {
-    return <PetSelectionPage />;
-  }
-
+    };
     return (
         <div className="min-h-screen bg-orange-100">
             <Navbar />
             <div className="flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md mt-16">
                     <h2 className="text-3xl font-bold text-orange-600 mb-6 text-center">Log In</h2>
-                    <form className="space-y-4" onSubmit={handleSignIn}>
+                    <form className="space-y-4" onSubmit={submitHandler}>
                         <div className="form-control">
                             <input 
                                 type="email" 

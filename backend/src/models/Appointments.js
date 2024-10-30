@@ -25,21 +25,14 @@ const Appointment = sequelize.define('Appointment', {
         allowNull: false,
     },
     careTaker: {
-        type: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        id: {
-            type: DataTypes.UUID,
-            allowNull: false,
-        },
+        type: DataTypes.JSON,
+        allowNull: true,
     },
     notes: {
         type: DataTypes.STRING(1234),
     },
 });
 
-Appointment.belongsTo(Pet, { foreignKey: 'petId' });
-Pet.hasMany(Appointment, { foreignKey: 'petId' });
+
 
 module.exports = Appointment;
