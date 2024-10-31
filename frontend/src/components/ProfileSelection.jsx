@@ -1,34 +1,63 @@
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import Navbar from './Navbar';
 import PetProfile from './PetProfile';
 import dogProfilePic from './dogProfilePic.jpg';
 import catProfilePic from './catProfilePic.jpeg';
 import hamsterProfilePic from './hamster1.jpg';
+import { AuthContext } from '../shared/context/auth-context';
 
 const PetSelectionPage = () => {
   const [selectedPet, setSelectedPet] = useState(null);
 
   // Mock data for pets (this would eventually come from database)
-  const pets = [
-    { id: 1, name: 'Diesel', image: dogProfilePic, type: 'dog', age: 8, weightData: [
-        { date: '2023-05-01', weight: 50 },
-        { date: '2023-05-15', weight: 55 },
-        { date: '2023-06-01', weight: 52 },
-        { date: '2023-06-15', weight: 57 }
-      ]},
-    { id: 2, name: 'Daisy', image: catProfilePic, type: 'cat', age:12, weightData: [
-        { date: '2023-05-01', weight: 50 },
-        { date: '2023-05-15', weight: 55 },
-        { date: '2023-06-01', weight: 52 },
-        { date: '2023-06-15', weight: 57 }
-      ]},
-    { id: 3, name: 'Derek', image: hamsterProfilePic, type: 'hamster', age: 14, weightData: [
-        { date: '2023-05-01', weight: 50 },
-        { date: '2023-05-15', weight: 55 },
-        { date: '2023-06-01', weight: 52 },
-        { date: '2023-06-15', weight: 57 }
-      ]},
-  ];
+  // const pets = [
+  //   { id: 1, name: 'Diesel', image: dogProfilePic, type: 'dog', age: 8, weightData: [
+  //       { date: '2023-05-01', weight: 50 },
+  //       { date: '2023-05-15', weight: 55 },
+  //       { date: '2023-06-01', weight: 52 },
+  //       { date: '2023-06-15', weight: 57 }
+  //     ]},
+  //   { id: 2, name: 'Daisy', image: catProfilePic, type: 'cat', age:12, weightData: [
+  //       { date: '2023-05-01', weight: 50 },
+  //       { date: '2023-05-15', weight: 55 },
+  //       { date: '2023-06-01', weight: 52 },
+  //       { date: '2023-06-15', weight: 57 }
+  //     ]},
+  //   { id: 3, name: 'Derek', image: hamsterProfilePic, type: 'hamster', age: 14, weightData: [
+  //       { date: '2023-05-01', weight: 50 },
+  //       { date: '2023-05-15', weight: 55 },
+  //       { date: '2023-06-01', weight: 52 },
+  //       { date: '2023-06-15', weight: 57 }
+  //     ]},
+  // ];
+  const auth = useContext(AuthContext);
+
+  const [pets, setPets] = useState([]);
+  const [email, isLoggedIn] = useContext(AuthContext);
+  const fetchPetData = async () => {
+    try {
+      const response = await fetch('http://localhost:51007/pets/get', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email      
+      })
+      });
+      const data = await response.json();
+      console.log(data);
+      setPets(data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn && email) {
+      fetchPetData();
+    }
+  }, [isLoggedIn, email]);
 
   const handlePetClick = (pet) => {
     setSelectedPet(pet);

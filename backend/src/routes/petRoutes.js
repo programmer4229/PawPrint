@@ -4,7 +4,7 @@ const petControllers = require('../controllers/petControllers');
 
 
 router.post('/create', petControllers.createPet);
-router.get('/', petControllers.getPets);
+router.get('/get', petControllers.getPets);
 router.patch('/profile/:id', petControllers.updatePet);
 router.delete('/profile/:id', petControllers.deletePet);
 

@@ -32,6 +32,13 @@ const User = sequelize.define('User', {
     address: {
         type: DataTypes.STRING,
     },
+    pets: {
+        type: DataTypes.ARRAY(DataTypes.UUID),
+        references: {
+            model: Pet,
+            key: 'id',
+        }
+    }
 });
 
 

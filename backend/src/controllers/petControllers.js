@@ -1,4 +1,5 @@
 const Pet = require('../models/Pets');
+const User = require('../models/Users');
 
 async function createPet(req, res, next) {
     try {
@@ -10,11 +11,13 @@ async function createPet(req, res, next) {
 };
 
 async function getPets(req, res, next) {
+    const email = req.body.email;
+    const user = await User.findOne({ where: { email } });
     try {
-        const pets = await Pet.findAll(pk = req.params.id);
+        const pets = await Pet.findAll({ where: { ownerId: user.id } });
         res.json(pets);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json({ message: "Could not find pets for user" });
     }
 };
 

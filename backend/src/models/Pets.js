@@ -30,7 +30,17 @@ const Pet = sequelize.define('Pet', {
     },
     careInstructions: {
         type: DataTypes.STRING(1234),
-    }
+    },
+    image : {
+        type: DataTypes.STRING,
+    },
+    adoptionStatus: {
+        type: DataTypes.STRING,
+        defaultValue: 'Available',
+    },
+    weights: {
+        type: DataTypes.ARRAY(DataTypes.JSON),
+    },
 });
 
 
