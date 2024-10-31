@@ -5,11 +5,15 @@ import PetProfile from './PetProfile';
 function AddPetProfile() {
     const [showPetProfile, setShowPetProfile] = useState(false);
     const [name, setName] = useState('');
-    //const [image, setimage] = useState('');
+    const [image, setImage] = useState('');
     const [chipid, setChipID] = useState('');
     const [type, setType] = useState('');
     const [breed, setBreed] = useState('');
-    const [age, setAge] = useState('');
+    const [dateOfBirth, setDateOfBirth] = useState('');
+    const [ownerId, setOwnerId] = useState('');
+    const [careInstructions, setCareInstructions] = useState('');
+    const [adoptionStatus, setAdoptionStatus] = useState('');
+    const [weight, setWeight] = useState('');
 
     const handleAddingPet = (e) => {
         e.preventDefault();
@@ -29,6 +33,16 @@ function AddPetProfile() {
                 <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md mt-16">
                     <h2 className="text-3xl font-bold text-orange-600 mb-6 text-center">Add Your Pet!</h2>
                     <form className="space-y-4" onSubmit={handleAddingPet}>
+                        <div className="form-control">
+                            <input 
+                                type="image" 
+                                placeholder="Image" 
+                                value={image}
+                                onChange={(e) => setImage(e.target.value)}
+                                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            />
+                        </div>
+
                         <div className="form-control">
                             <input 
                                 type="name" 
@@ -73,10 +87,53 @@ function AddPetProfile() {
 
                         <div className="form-control">
                             <input 
-                                type="age" 
-                                placeholder="Age" 
-                                value={age}
-                                onChange={(e) => setAge(e.target.value)}
+                                type="dateofbirth" 
+                                placeholder="DateOfBirth" 
+                                value={dateOfBirth}
+                                onChange={(e) => setDateOfBirth(e.target.value)}
+                                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                required
+                            />
+                        </div>
+
+                        <div className="form-control">
+                            <input 
+                                type="ownerId" 
+                                placeholder="OwnerId" 
+                                value={ownerId}
+                                onChange={(e) => setOwnerId(e.target.value)}
+                                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                required
+                            />
+                        </div>
+
+                        <div className="form-control">
+                            <input 
+                                type="careInstructions" 
+                                placeholder="CareInstructions" 
+                                value={careInstructions}
+                                onChange={(e) => setCareInstructions(e.target.value)}
+                                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                            />
+                        </div>
+
+                        <div className="form-control">
+                            <input 
+                                type="adoptionStatus" 
+                                placeholder="AdoptionStatus" 
+                                value={adoptionStatus}
+                                onChange={(e) => setAdoptionStatus(e.target.value)}
+                                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                required
+                            />
+                        </div>
+
+                        <div className="form-control">
+                            <input 
+                                type="weight" 
+                                placeholder="Weight" 
+                                value={weight}
+                                onChange={(e) => setWeight(e.target.value)}
                                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                             />
                         </div>

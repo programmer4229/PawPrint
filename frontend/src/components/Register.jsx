@@ -4,10 +4,13 @@ import SignIn from './SignIn';
 
 function Register() {
     const [showSignIn, setShowSignIn] = useState(false);
+    const [name, setName] = useState('');
+    const [id, setId] = useState('');
     const [email, setEmail] = useState('');
-    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [cfmpassword, setCfmPassword] = useState('');
+    const [phone, setPhone] = useState('');
+    const [address, setAddress] = useState('');
 
     const handleRegistration = (e) => {
         e.preventDefault();
@@ -29,6 +32,28 @@ function Register() {
                     <form className="space-y-4" onSubmit={handleRegistration}>
                         <div className="form-control">
                             <input 
+                                type="name" 
+                                placeholder="Name" 
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                required
+                            />
+                        </div>
+
+                        <div className="form-control">
+                            <input 
+                                type="id" 
+                                placeholder="Id" 
+                                value={id}
+                                onChange={(e) => setId(e.target.value)}
+                                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                required
+                            />
+                        </div>
+
+                        <div className="form-control">
+                            <input 
                                 type="email" 
                                 placeholder="Email" 
                                 value={email}
@@ -40,10 +65,21 @@ function Register() {
 
                         <div className="form-control">
                             <input 
-                                type="username" 
-                                placeholder="Username" 
-                                value={email}
-                                onChange={(e) => setUsername(e.target.value)}
+                                type="phone" 
+                                placeholder="Phone" 
+                                value={phone}
+                                onChange={(e) => setPhone(e.target.value)}
+                                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                required
+                            />
+                        </div>
+
+                        <div className="form-control">
+                            <input 
+                                type="address" 
+                                placeholder="Address" 
+                                value={address}
+                                onChange={(e) => setAddress(e.target.value)}
                                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 required
                             />
