@@ -81,8 +81,10 @@ function SignIn() {
                         <span className="text-gray-600">New to PawPrint?</span>
                         <button 
                             className="text-orange-500 hover:text-orange-600 font-medium focus:outline-none focus:underline"
+                            onClick={() => navigate('/register')}
                         >
                             Register here!
+                            
                         </button>
                     </div>
                 </div>

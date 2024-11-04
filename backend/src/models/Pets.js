@@ -1,6 +1,5 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const User = require('./Users');
 
 const Pet = sequelize.define('Pet', {
     id: {
@@ -41,6 +40,13 @@ const Pet = sequelize.define('Pet', {
     weights: {
         type: DataTypes.ARRAY(DataTypes.JSON),
     },
+    userId: {
+        type: Sequelize.UUID,
+        references: {
+          model: 'Users',
+          key: 'id',
+        },
+      },
 });
 
 

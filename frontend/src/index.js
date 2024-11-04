@@ -6,6 +6,7 @@ import reportWebVitals from './reportWebVitals';
 import SignIn from './components/SignIn';
 import PetSelectionPage from './components/ProfileSelection';
 import PetProfile from './components/PetProfile';
+import Register from './components/Register';
 import { RouterProvider } from 'react-router-dom';
 import { AuthContext } from './shared/context/auth-context';
 import ProtectedRoute from './shared/context/ProtectedRoutes';
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
         <ProtectedRoute>
           <PetProfile />
         </ProtectedRoute>},
+    {path: '/register', element: <Register />},
 ]);
 
 const RootComponent = () => {

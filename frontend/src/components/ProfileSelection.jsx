@@ -1,9 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import Navbar from './Navbar';
 import PetProfile from './PetProfile';
-import dogProfilePic from './dogProfilePic.jpg';
-import catProfilePic from './catProfilePic.jpeg';
-import hamsterProfilePic from './hamster1.jpg';
 import { AuthContext } from '../shared/context/auth-context';
 
 const PetSelectionPage = () => {
@@ -31,19 +28,16 @@ const PetSelectionPage = () => {
   //     ]},
   // ];
   const auth = useContext(AuthContext);
+  const { email, isLoggedIn } = auth;
 
   const [pets, setPets] = useState([]);
-  const [email, isLoggedIn] = useContext(AuthContext);
   const fetchPetData = async () => {
     try {
-      const response = await fetch('http://localhost:51007/pets/get', {
+      const response = await fetch(`http://localhost:51007/pets/get?email=${email}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email      
-      })
+        }
       });
       const data = await response.json();
       console.log(data);
@@ -73,7 +67,7 @@ const PetSelectionPage = () => {
 
       <main className="container mx-auto p-4 min-h-screen flex items-center justify-center">
   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-12">
-    {pets.map((pet) => (
+    {pets.length === 0 ? <p className="text-lg font-semibold">No pets found</p> : pets.map((pet) => (
       <div key={pet.id} className="flex flex-col items-center" onClick={() => handlePetClick(pet)}>
         <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-orange-500 mb-2 cursor-pointer">
           <img src={pet.image} alt={pet.name} className="w-full h-full object-cover" />

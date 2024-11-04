@@ -5,23 +5,43 @@ import SignIn from './SignIn';
 function Register() {
     const [showSignIn, setShowSignIn] = useState(false);
     const [name, setName] = useState('');
-    const [id, setId] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [cfmpassword, setCfmPassword] = useState('');
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
 
-    const handleRegistration = (e) => {
-        e.preventDefault();
-        // In a real application, you would validate the credentials here
-        // For this example, we'll just show the SignIn
-        setShowSignIn(true);
-    };
 
     if (showSignIn) {
         return <SignIn />;
     }
+
+    const submitHandler = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await fetch('http://localhost:51007/users/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password,
+                    cfmpassword,
+                    phone,
+                    address
+                })
+            });
+            const responseData = await response.json();
+            if (!response.ok) {
+                throw new Error(responseData.message);
+            }
+            console.log("Successfully Registered");
+            setShowSignIn(true);
+            return <SignIn />;
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-orange-100">
@@ -29,24 +49,13 @@ function Register() {
             <div className="flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md mt-16">
                     <h2 className="text-3xl font-bold text-orange-600 mb-6 text-center">Register</h2>
-                    <form className="space-y-4" onSubmit={handleRegistration}>
+                    <form className="space-y-4" onSubmit={submitHandler}>
                         <div className="form-control">
                             <input 
                                 type="name" 
                                 placeholder="Name" 
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                                required
-                            />
-                        </div>
-
-                        <div className="form-control">
-                            <input 
-                                type="id" 
-                                placeholder="Id" 
-                                value={id}
-                                onChange={(e) => setId(e.target.value)}
                                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 required
                             />
