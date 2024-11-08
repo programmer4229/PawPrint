@@ -2,36 +2,20 @@ import React, { useState, useContext, useEffect } from 'react';
 import Navbar from './Navbar';
 import PetProfile from './PetProfile';
 import { AuthContext } from '../shared/context/auth-context';
+import { useNavigate } from 'react-router-dom';
 
 const PetSelectionPage = () => {
   const [selectedPet, setSelectedPet] = useState(null);
-
-  // Mock data for pets (this would eventually come from database)
-  // const pets = [
-  //   { id: 1, name: 'Diesel', image: dogProfilePic, type: 'dog', age: 8, weightData: [
-  //       { date: '2023-05-01', weight: 50 },
-  //       { date: '2023-05-15', weight: 55 },
-  //       { date: '2023-06-01', weight: 52 },
-  //       { date: '2023-06-15', weight: 57 }
-  //     ]},
-  //   { id: 2, name: 'Daisy', image: catProfilePic, type: 'cat', age:12, weightData: [
-  //       { date: '2023-05-01', weight: 50 },
-  //       { date: '2023-05-15', weight: 55 },
-  //       { date: '2023-06-01', weight: 52 },
-  //       { date: '2023-06-15', weight: 57 }
-  //     ]},
-  //   { id: 3, name: 'Derek', image: hamsterProfilePic, type: 'hamster', age: 14, weightData: [
-  //       { date: '2023-05-01', weight: 50 },
-  //       { date: '2023-05-15', weight: 55 },
-  //       { date: '2023-06-01', weight: 52 },
-  //       { date: '2023-06-15', weight: 57 }
-  //     ]},
-  // ];
   const auth = useContext(AuthContext);
   const { email, isLoggedIn } = auth;
+  const navigate = useNavigate();
+
+  console.log("AuthContext values in ProfileSelection:", { isLoggedIn, email }); // Debugging log
 
   const [pets, setPets] = useState([]);
+
   const fetchPetData = async () => {
+    if (!email) return;
     try {
       const response = await fetch(`http://localhost:51007/pets/get?email=${email}`, {
         method: 'GET',
@@ -40,12 +24,17 @@ const PetSelectionPage = () => {
         }
       });
       const data = await response.json();
-      console.log(data);
-      setPets(data);
+      console.log('Fetched pets data:', data);
+  
+      // Check if the response is an array; if not, handle as an empty array or error
+      setPets(Array.isArray(data) ? data : []);
+      if (!Array.isArray(data)) {
+        console.log("No pets found or an error occurred:", data.message || data);
+      }
     } catch (error) {
-      console.error(error);
+      console.error('Error fetching pets:', error);
     }
-  };
+  };  
 
   useEffect(() => {
     if (isLoggedIn && email) {
@@ -55,6 +44,7 @@ const PetSelectionPage = () => {
 
   const handlePetClick = (pet) => {
     setSelectedPet(pet);
+    navigate(`/petprofile/${pet.id}`); // Pass the pet ID in the route
   };
 
   if (selectedPet) {

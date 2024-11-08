@@ -26,16 +26,19 @@ app.use(cors(
 app.use(express.json());
 
 app.use('/users', userRoutes);
-app.use('/pets', petRoutes);
+app.use('/pets', (req, res, next) => {
+    console.log("Pet route accessed with path:", req.path);
+    next();
+}, petRoutes);
 app.use('/appointments', appointmentRoutes);
 
 
 
-sequelize.sync({ force: true }).then(() => {
+sequelize.sync({ force: false }).then(() => {
     console.log('Database connected');
     app.listen(process.env.PORT, () => {
-    console.log(`Server is running on port ${process.env.PORT}`);
-});
+        console.log(`Server is running on port ${process.env.PORT}`);
+    });
 })
 .catch(err => console.log(err));
 
