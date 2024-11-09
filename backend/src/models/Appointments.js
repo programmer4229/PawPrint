@@ -31,6 +31,9 @@ const Appointment = sequelize.define('Appointment', {
     notes: {
         type: DataTypes.STRING(1234),
     },
+}, {
+    tableName: 'appointments',
+    timestamps: false
 });
 
 

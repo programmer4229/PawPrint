@@ -30,16 +30,21 @@ function SignIn() {
                 })
             });
             const responseData = await response.json();
+    
             if (!response.ok) {
                 throw new Error(responseData.message);
             }
+    
             console.log("Successfully Logged In");
-            login();
+    
+            // Pass email and userId to auth.login
+            auth.login(email, responseData.userId);
             navigate('/petselection');
         } catch (error) {
             console.log(error);
         }
     };
+    
     return (
         <div className="min-h-screen bg-orange-100">
             <Navbar />

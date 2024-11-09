@@ -27,32 +27,28 @@ const generateToken = (userId) => {
 };
 
 async function registerUser(req, res, next) {
-  const user = User.build({ ...req.body });
-  const passwordHash = await bcrypt.hash(user.password, 10);
-  user.password = passwordHash;
   try {
-    await user.save();
-    res.json({ message: 'User registered successfully' });
+      const passwordHash = await bcrypt.hash(req.body.password, 10);
+      
+      const user = await User.create(
+          {
+              name: req.body.name,
+              email: req.body.email,
+              password: passwordHash,
+              phone: req.body.phone,
+              address: req.body.address,
+              // include `type` if it's provided, else default to "Owner"
+              ...(req.body.type && { type: req.body.type })
+          },
+          { fields: ['name', 'email', 'password', 'phone', 'address', 'type'] }
+      );
+
+      res.json({ message: 'User registered successfully' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+      console.error("Error registering user:", err);
+      res.status(500).json({ message: err.message });
   }
 }
-
-// async function registerUser(username, password) {
-//   try {
-//     const saltRounds = 10;
-//     const passwordHash = await bcrypt.hash(password, saltRounds);
-
-//     const query = 'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id';
-//     const values = [username, passwordHash];
-
-//     const res = await client.query(query, values);
-//     console.log('User registered with ID:', res.rows[0].id);
-//   } catch (err) {
-//     console.error('Error registering user:', err);
-//   }
-// }
-
 
 async function loginUser(req, res, next) {
   const { email, password } = req.body;
@@ -65,7 +61,7 @@ async function loginUser(req, res, next) {
     const isMatch = await bcrypt.compare(password, user.password);
     if (isMatch) {
       const token = generateToken(user.id);
-      res.json({ token });
+      res.json({ userId: user.id, token });
     } else {
       res.status(401).json({ message: 'Invalid password' });
     }
@@ -73,38 +69,8 @@ async function loginUser(req, res, next) {
     res.status(500).json({ message: err.message });
   }
 }
-// async function loginUser(username, password) {
-//     try {
-//       const query = 'SELECT password_hash FROM users WHERE username = $1';
-//       const values = [username];
-  
-//       const res = await client.query(query, values);
-  
-//       if (res.rows.length === 0) {
-//         console.log('User not found');
-//         return false;
-//       }
-  
-//       const passwordHash = res.rows[0].password_hash;
-  
-//       const isMatch = await bcrypt.compare(password, passwordHash);
-  
-//       if (isMatch) {
-//         console.log('Login successful');
-//         return true;
-//       } else {
-//         console.log('Invalid password');
-//         return false;
-//       }
-//     } catch (err) {
-//       console.error('Error logging in user:', err);
-//       return false;
-//     }
-//   }
   
 module.exports = {
   registerUser,
   loginUser,
 };
-// registerUser('chrispark2003', '123456');
-// loginUser('chrispark2003', '12345'); 

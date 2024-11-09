@@ -10,7 +10,7 @@ function Register() {
     const [cfmpassword, setCfmPassword] = useState('');
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
-
+    const [message, setMessage] = useState('');
 
     if (showSignIn) {
         return <SignIn />;
@@ -18,6 +18,12 @@ function Register() {
 
     const submitHandler = async (e) => {
         e.preventDefault();
+
+        if (password !== cfmpassword) {
+            setMessage("Passwords do not match!");
+            return;
+        }
+
         try {
             const response = await fetch('http://localhost:51007/users/register', {
                 method: 'POST',
@@ -26,7 +32,6 @@ function Register() {
                     name,
                     email,
                     password,
-                    cfmpassword,
                     phone,
                     address
                 })
@@ -36,10 +41,12 @@ function Register() {
                 throw new Error(responseData.message);
             }
             console.log("Successfully Registered");
+            setMessage("Successfully Registered! Redirecting to Sign In...");
             setShowSignIn(true);
             return <SignIn />;
         } catch (error) {
             console.log(error);
+            setMessage("Registration failed: " + error.message);
         }
     };
 
@@ -49,7 +56,9 @@ function Register() {
             <div className="flex items-center justify-center p-4">
                 <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md mt-16">
                     <h2 className="text-3xl font-bold text-orange-600 mb-6 text-center">Register</h2>
+                    
                     <form className="space-y-4" onSubmit={submitHandler}>
+                        {/* Form fields */}
                         <div className="form-control">
                             <input 
                                 type="name" 
@@ -107,7 +116,7 @@ function Register() {
 
                         <div className="form-control">
                             <input 
-                                type="cfmpassword" 
+                                type="password" 
                                 placeholder="Confirm Password" 
                                 value={cfmpassword}
                                 onChange={(e) => setCfmPassword(e.target.value)}
@@ -123,6 +132,11 @@ function Register() {
                             Create Account
                         </button>
                     </form>
+
+                    {/* Message display */}
+                    {message && (
+                        <p className="text-center text-red-600 mt-4">{message}</p>
+                    )}
                     
                     <div className="mt-6 flex items-center justify-center space-x-2">
                         <span className="text-gray-600">Already have an account?</span>

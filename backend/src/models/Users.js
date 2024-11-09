@@ -10,7 +10,7 @@ const User = sequelize.define('User', {
     },
     type: {
         type: DataTypes.STRING,
-        allowNull: true,
+        defaultValue: 'Owner',
     },
     name: {
         type: DataTypes.STRING,
@@ -32,6 +32,9 @@ const User = sequelize.define('User', {
     address: {
         type: DataTypes.STRING,
     }
+}, {
+    tableName: 'users',
+    timestamps: false
 });
 
 

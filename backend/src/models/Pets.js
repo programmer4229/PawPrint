@@ -1,5 +1,6 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
+const User = require('./Users');
 
 const Pet = sequelize.define('Pet', {
     id: {
@@ -20,22 +21,26 @@ const Pet = sequelize.define('Pet', {
         allowNull: true
     },
     dateOfBirth: {
-        type: DataTypes.DATEONLY,
-        allowNull: true
+        type: DataTypes.DATE,
+        allowNull: true,
+        field: 'dateofbirth'
     },
     ownerId: {
         type: DataTypes.UUID,
         allowNull: true,
+        field: 'ownerid'
     },
     careInstructions: {
         type: DataTypes.STRING(1234),
+        field: 'careinstructions'
     },
-    image : {
+    image: {
         type: DataTypes.STRING,
     },
     adoptionStatus: {
         type: DataTypes.STRING,
         defaultValue: 'Available',
+        field: 'adoptionstatus'
     },
     weights: {
         type: DataTypes.ARRAY(DataTypes.JSON),
@@ -43,11 +48,15 @@ const Pet = sequelize.define('Pet', {
     userId: {
         type: Sequelize.UUID,
         references: {
-          model: 'Users',
+          model: User,
           key: 'id',
         },
+        field: 'userid'
       },
-});
+    }, {
+        tableName: 'pets',
+        timestamps: false
+    });
 
 
 module.exports = Pet;

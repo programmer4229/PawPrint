@@ -14,38 +14,46 @@ import ProtectedRoute from './shared/context/ProtectedRoutes';
 import { createBrowserRouter } from 'react-router-dom';
 
 const router = createBrowserRouter([
-    {path: '/' , element: <App />},
-    {path: '/signin', element: <SignIn />},
-    {path: '/petselection',
-      element:
-        <ProtectedRoute>
-          <PetSelectionPage />
-        </ProtectedRoute>},
-    {path: '/petprofile', 
-      element: 
-        <ProtectedRoute>
-          <PetProfile />
-        </ProtectedRoute>},
-    {path: '/register', element: <Register />},
+  { path: '/', element: <App /> },
+  { path: '/signin', element: <SignIn /> },
+  { path: '/petselection', 
+    element: 
+      <ProtectedRoute>
+        <PetSelectionPage />
+      </ProtectedRoute> },
+  { path: '/petprofile/:petId',
+    element: 
+      <ProtectedRoute>
+        <PetProfile />
+      </ProtectedRoute> },
+  { path: '/register', element: <Register /> },
 ]);
+
 
 const RootComponent = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [email, setEmail] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-  const login = useCallback(() => {
+  const login = useCallback((userEmail, userId) => {
       setIsLoggedIn(true);
+      setEmail(userEmail);
+      setUserId(userId);
   }, []);
 
   const logout = useCallback(() => {
       setIsLoggedIn(false);
+      setEmail(null);
+      setUserId(null);
   }, []);
 
   return (
-      <AuthContext.Provider value={{ isLoggedIn, login, logout }}>
+      <AuthContext.Provider value={{ isLoggedIn, email, userId, login, logout }}>
           <RouterProvider router={router} />
       </AuthContext.Provider>
   );
 };
+
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
