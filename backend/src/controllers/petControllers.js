@@ -1,6 +1,7 @@
 const Pet = require('../models/Pets');
 const User = require('../models/Users');
 const { AdoptionInfo, Vaccination, Medication } = require('../models/MedicalHistory');
+const SharedPets = require('../models/SharedPets');
 
 async function createPet(req, res, next) {
     try {
@@ -66,27 +67,64 @@ async function getPetById(req, res, next) {
 }
 
 async function sharePetProfile(req, res) {
+    // console.log("Fetching pet adoption info by email");
     const { petId, targetEmail } = req.body;
-    
     try {
         // Find the target user by email
         const targetUser = await User.findOne({ where: { email: targetEmail } });
+        // console.log("Associations available on User model:", User.associations);
+        
+        // console.log("Target user:", targetUser);
+        // console.log("Target email:", targetEmail);
+        // Log all available methods on targetUser to verify method names
+        // console.log("Available methods on targetUser:", Object.keys(targetUser.__proto__));
+
         if (!targetUser) {
             return res.status(404).json({ message: "User not found" });
         }
         
-        // Find the pet
+        // Find the pet by petID
         const pet = await Pet.findByPk(petId);
+        // console.log("Find pet by petID:", petId);
+        // console.log("Found pet:", pet);
         if (!pet) {
             return res.status(404).json({ message: "Pet not found" });
         }
 
-        // Add the pet to the target user's shared pets
-        await targetUser.addPet(pet); // Assuming a many-to-many association exists
+        // Share the pet profile with the target user (read-only)
+        await targetUser.addSharedPets(pet, { through: { readOnly: true } });
 
-        res.json({ message: `Pet profile shared with ${targetEmail}` });
+        res.json({ message: `${pet.name}'s pet profile shared with ${targetEmail}` });
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        console.error('Error sharing pet profile:', err);
+        res.status(500).json({ message: "Internal Server Error" });
+    }
+}
+
+async function getSharedPetProfiles(req, res) {
+    const userId = req.headers.userid; // Read userId from headers
+    // console.log("User ID (from headers):", userId);
+
+    if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+    }
+
+    try {
+        const sharedPets = await SharedPets.findAll({
+            where: { userId: userId, readOnly: true },
+            include: [{
+                model: Pet,
+                attributes: ['id', 'name', 'type', 'breed', 'dateOfBirth', 'careInstructions', 'image', 'adoptionStatus', 'weights']
+            }]
+        });
+        // console.log("Retrieved sharedPets:", sharedPets);
+
+        const petProfiles = sharedPets.map(shared => shared.Pet);
+        // console.log("Pet profiles mapped from sharedPets:", petProfiles);
+        res.json(petProfiles);
+    } catch (err) {
+        console.error('Error fetching shared pets:', err);
+        res.status(500).json({ message: "Internal Server Error" });
     }
 }
 
@@ -117,10 +155,10 @@ async function getVaccinations(req, res) {
 }
 
 async function getMedications(req, res) {
-    console.log("Fetching pet medications by ID:", req.params.id);
+    // console.log("Fetching pet medications by ID:", req.params.id);
     try {
         const medications = await Medication.findAll({ where: { petId: req.params.id } });
-        console.log(medications);
+        // console.log(medications);
         if (!medications.length) return res.status(404).json({ message: "No medications found" });
         res.json(medications);
     } catch (error) {
@@ -138,5 +176,6 @@ module.exports = {
     sharePetProfile,
     getAdoptionInfo,
     getVaccinations,
-    getMedications
+    getMedications,
+    getSharedPetProfiles
 };

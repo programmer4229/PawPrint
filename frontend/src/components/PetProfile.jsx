@@ -25,135 +25,134 @@ const calculateAge = (birthDate) => {
 
 const PetProfile = () => {
   const [activeTab, setActiveTab] = useState('medical');
-
-  // Default values if pet data is missing
-  const defaultPet = {
-    name: 'Default Name',
-    image: '/placeholder.svg?height=128&width=128',
-    chipId: 'N/A',
-    type: 'Dog',
-    breed: 'Defaul Breed',
-    age: 'N/A'
-  };
-
-  const defaultMeds = [{
-    medicationName: 'Default Name',
-    dosage: '/placeholder.svg?height=128&width=128',
-    frequency: 'N/A',
-    medicationDate: 'Dog',
-    vetName: 'Defaul Breed',
-    dueDate: 'N/A',
-    notes: 'N/A'
-  }];
-
+  const { userId } = useContext(AuthContext);
   const { petId } = useParams();
-  const [pet, setPet] = useState(null);
-  const [shareEmail, setShareEmail] = useState('');
-  const [shareStatus, setShareStatus] = useState('');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const auth = useContext(AuthContext);
-
+  const [petData, setPetData] = useState(null);
   const [adoptionInfo, setAdoptionInfo] = useState(null);
   const [vaccinations, setVaccinations] = useState([]);
   const [medications, setMedications] = useState([]);
 
-  useEffect(() => {
-    // Fetch pet data by ID
-    const fetchPetData = async () => {
-      try {
-        const response = await axios.get(`http://localhost:51007/pets/profile/${petId}`, {
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          params: { userId: auth.userId }, // Send userId if necessary
-        });
-        setPet(response.data); // Set fetched data to pet state
-      } catch (error) {
-        console.error("Error fetching pet data:", error);
-        setPet({
-          name: 'Default Name',
-          image: '/placeholder.svg?height=128&width=128',
-          chipId: 'N/A',
-          type: 'Dog',
-          breed: 'Defaul Breed',
-          age: 'N/A'
-        }); // Default if there's an error
-      }
-    };
+  const [pet, setPet] = useState(null);
+  const [shareEmail, setShareEmail] = useState('');
+  const [shareStatus, setShareStatus] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-    // Fetch Adoption Info by ID
-    const fetchAdoptionInfo = async () => {
-      try {
-        const response = await axios.get(`http://localhost:51007/pets/profile/${petId}/adoption`);
-        setAdoptionInfo(response.data);
-      } catch (error) {
-        console.error("Error fetching adoption info:", error);
-      }
-    };
 
-    // Fetch Vaccinations by ID
-    const fetchVaccinations = async () => {
-      try {
-        const response = await axios.get(`http://localhost:51007/pets/profile/${petId}/vaccination`);
-        setVaccinations(response.data);
-      } catch (error) {
+  // Fetch pet data by ID
+  const fetchPetData = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`http://localhost:51007/pets/profile/${petId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'userId': userId,
+        }
+      });
+      setPetData(response.data);
+      console.log("Fetched pet data:", response.data);
+    } catch (error) {
+      console.error("Error fetching pet data:", error);
+    }
+  };
+
+  // Fetch Adoption Info by ID
+  const fetchAdoptionInfo = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`http://localhost:51007/pets/profile/${petId}/adoption`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'userId': userId,
+        }
+      });
+      setAdoptionInfo(response.data);
+      console.log("Fetched adoption info:", response.data);
+    } catch (error) {
+      console.error("Error fetching adoption info:", error);
+    }
+  };
+
+  // Fetch Vaccinations by ID
+  const fetchVaccinations = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`http://localhost:51007/pets/profile/${petId}/vaccination`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'userId': userId,
+        }
+      });
+      setVaccinations(response.data);
+      console.log("Fetched vaccinations:", response.data);
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.warn("No vaccinations found for this pet");
+        setVaccinations([]);
+      } else {
         console.error("Error fetching vaccinations:", error);
       }
-    };
+    }
+  };
 
-    // Fetch Medications by ID
-    const fetchMedications = async () => {
-      try {
-        const response = await axios.get(`http://localhost:51007/pets/profile/${petId}/medication`);
-        setMedications(response.data);
-      } catch (error) {
+  // Fetch Medications by ID
+  const fetchMedications = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`http://localhost:51007/pets/profile/${petId}/medication`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'userId': userId,
+        }
+      });
+      setMedications(response.data);
+      console.log("Fetched medications:", response.data);
+    } catch (error) {
+      if (error.response && error.response.status === 404) {
+        console.warn("No medications found for this pet");
+        setMedications([]);
+      } else {
         console.error("Error fetching medications:", error);
       }
-    };
+    }
+  };
 
+  useEffect(() => {
     fetchPetData();
     fetchAdoptionInfo();
     fetchVaccinations();
     fetchMedications();
   }, [petId]);
 
-  useEffect(() => {
-    if (pet) {
-      console.log("Contents of 'pet':", pet);
-    }
-    if (medications) {
-      console.log("Contents of 'medications':", medications);
-    }
-  }, [pet], [medications]);
-
-  // Use the provided pet data or fall back to default values
-  const petData = pet || defaultPet;
-  console.log("Contents of 'petData':", petData);
-
-  // for debuggind
-  // useEffect(() => {
-  //   if (medications) {
-  //     console.log("Contents of 'medications':", medications);
-  //   }
-  // }, [medications]);
-
-  // Use the provided pet data or fall back to default values
-  const medInfo = medications || defaultMeds;
-  console.log("Contents of 'medInfo':", medInfo);
-
   const handleShare = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem('token');
     try {
-      const response = await axios.post('http://localhost:51007/share', {
+      console.log("petId:", petId);
+      console.log("target email:", shareEmail);
+      const response = await axios.post(
+        'http://localhost:51007/pets/share',
+        {
         petId,
         targetEmail: shareEmail,
-      });
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+            'userId': userId,
+          },
+        }  
+      );
       setShareStatus(`Profile shared successfully with ${shareEmail}!`);
       setShareEmail(''); // Clear the email input
       setIsModalOpen(false); // Close the modal after sharing
     } catch (error) {
       setShareStatus("Failed to share profile. Try again.");
-      console.error(error);
+      console.error("Error sharing pet profile:", error);
     }
   };
 
@@ -167,17 +166,15 @@ const PetProfile = () => {
     setShareEmail(''); // Clear the email input
   };
 
-  if (!pet) return <p>Loading pet profile...</p>;
-
   // Function to update pet's weight data
   const updatePetWeight = (updatedWeightData) => {
-    setPet((prevPet) => ({
+    setPetData((prevPet) => ({
       ...prevPet,
       weightData: updatedWeightData,
     }));
   };
 
-  if (!pet) return <p>Loading pet profile...</p>; // Display a loading message
+  if (!petData) return <p>Loading pet profile...</p>;
 
   return (
     <div className="min-h-screen bg-orange-100">
@@ -239,7 +236,7 @@ const PetProfile = () => {
             </div>
             <h2 className="text-2xl font-bold">{petData.name}</h2>
             <p className="text-gray-600">
-              Chip ID: {petData?.chipId || 'N/A'} | {(petData?.type).toUpperCase() || 'N/A'} | {petData?.breed || 'N/A'} | Age: {calculateAge(petData?.dateOfBirth) || 'N/A'} | DOB: {petData?.dateOfBirth || 'N/A'}
+              Chip ID: {petData?.chipId || 'N/A'} | {(petData?.type).toUpperCase() || 'Unknown'} | {petData?.breed || 'Unknown'} | Age: {calculateAge(petData?.dateOfBirth) || 'Unknown'} | DOB: {petData?.dateOfBirth ? new Date(petData.dateOfBirth).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : 'Unknown'}
             </p>
           </div>
 
@@ -301,55 +298,63 @@ const PetProfile = () => {
               {/* Vaccines Section */}
               <div>
                 <h3 className="text-lg font-semibold mb-2">Vaccines</h3>
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border p-2 text-left">Date</th>
-                      <th className="border p-2 text-left">Vaccine</th>
-                      <th className="border p-2 text-left">Physician</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {vaccinations.map((vaccine) => (
-                      <tr key={vaccine.vaccination_id}>
-                        <td className="border p-2">{vaccine?.vaccinationDate || 'N/A'}</td>
-                        <td className="border p-2">{vaccine?.vaccinationName || 'N/A'}</td>
-                        <td className="border p-2">{vaccine?.vetName || 'N/A'}</td>
+                {vaccinations.length > 0 ? (
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border p-2 text-left">Date</th>
+                        <th className="border p-2 text-left">Vaccine</th>
+                        <th className="border p-2 text-left">Physician</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {vaccinations.map((vaccine) => (
+                        <tr key={vaccine.vaccination_id}>
+                          <td className="border p-2">{vaccine?.vaccinationDate || 'N/A'}</td>
+                          <td className="border p-2">{vaccine?.vaccinationName || 'N/A'}</td>
+                          <td className="border p-2">{vaccine?.vetName || 'N/A'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="text-gray-500">No vaccination records found for this pet.</p>
+                )}
               </div>
               <br></br>
               {/* Medications Section */}
               <div>
                 <h3 className="text-lg font-semibold mb-2">Medications</h3>
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border p-2 text-left">Medicine</th>
-                      <th className="border p-2 text-left">Dosage</th>
-                      <th className="border p-2 text-left">Frequency</th>
-                      <th className="border p-2 text-left">Prescribed On</th>
-                      <th className="border p-2 text-left">Prescribed By</th>
-                      <th className="border p-2 text-left">Due Date</th>
-                      <th className="border p-2 text-left">Notes</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {medInfo.map((medicine) => (
-                      <tr key={medicine.vaccination_id}>
-                        <td className="border p-2">{medicine?.medicationName || 'N/A'}</td>
-                        <td className="border p-2">{medicine?.dosage || 'N/A'}</td>
-                        <td className="border p-2">{medicine?.frequency || 'N/A'}</td>
-                        <td className="border p-2">{medicine?.medicationDate || 'N/A'}</td>
-                        <td className="border p-2">{medicine?.vetName || 'N/A'}</td>
-                        <td className="border p-2">{medicine?.dueDate || 'N/A'}</td>
-                        <td className="border p-2">{medicine?.notes || 'N/A'}</td>
+                {medications.length > 0 ? (
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-gray-100">
+                        <th className="border p-2 text-left">Medicine</th>
+                        <th className="border p-2 text-left">Dosage</th>
+                        <th className="border p-2 text-left">Frequency</th>
+                        <th className="border p-2 text-left">Prescribed On</th>
+                        <th className="border p-2 text-left">Prescribed By</th>
+                        <th className="border p-2 text-left">Due Date</th>
+                        <th className="border p-2 text-left">Notes</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {medications.map((medicine) => (
+                        <tr key={medicine.vaccination_id}>
+                          <td className="border p-2">{medicine?.medicationName || 'N/A'}</td>
+                          <td className="border p-2">{medicine?.dosage || 'N/A'}</td>
+                          <td className="border p-2">{medicine?.frequency || 'N/A'}</td>
+                          <td className="border p-2">{medicine?.medicationDate || 'N/A'}</td>
+                          <td className="border p-2">{medicine?.vetName || 'N/A'}</td>
+                          <td className="border p-2">{medicine?.dueDate || 'N/A'}</td>
+                          <td className="border p-2">{medicine?.notes || 'N/A'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                ) : (
+                  <p className="text-gray-500">No medications found for this pet.</p>
+                )}
               </div>
             </div>
           )}
@@ -358,7 +363,7 @@ const PetProfile = () => {
           {activeTab === 'nutrition' && (
             <div>
               <h3 className="text-lg font-semibold mb-2">Nutrition Information</h3>
-              <NutritionTab pet={pet} updatePetWeight={updatePetWeight}/>
+              <NutritionTab pet={petData} updatePetWeight={updatePetWeight}/>
             </div>
           )}
 
