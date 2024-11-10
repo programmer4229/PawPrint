@@ -1,6 +1,6 @@
-// import router and controllers
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
 const petControllers = require('../controllers/petControllers');
 const authMiddleware = require('../middleware/authMiddleware');
 
@@ -23,6 +23,13 @@ router.post('/share', authMiddleware, petControllers.sharePetProfile);
 
 // route for fetching pet profiles shared with non-owner user
 router.get('/shared', authMiddleware, petControllers.getSharedPetProfiles);
+
+// configure Multer to store image in memory
+const storage = multer.memoryStorage(); // Set up memory storage
+const upload = multer({ storage: storage });
+
+// route to upload pet image
+router.post('/:id/upload', upload.single('image'), petControllers.uploadPetImage);
 
 
 module.exports = router;

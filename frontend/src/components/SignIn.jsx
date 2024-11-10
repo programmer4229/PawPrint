@@ -15,6 +15,7 @@ function SignIn() {
     const [error, setError] = useState(null);
 
     const auth = useContext(AuthContext);
+    // console.log("AuthContext in SignIn.jsx:", auth);
     const [isLoggedIn, setIsLoggedIn] = useState(true);
 
     const login = useCallback(() => {
@@ -26,34 +27,19 @@ function SignIn() {
         e.preventDefault();
         try {
             const response = await axios.post('http://localhost:51007/users/login', { email, password });
-            const { userId, token } = response.data;
+            const { userId, userName, token } = response.data;
+            // console.log("Login response data:", { userId, userName, token });
 
-            // const response = await fetch('http://localhost:51007/users/login', {
-            //     method: 'POST',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify({
-            //         email,
-            //         password
-            //     })
-            // });
-            // const responseData = await response.json();
-    
-            // if (!response.ok) {
-            //     throw new Error(responseData.message);
-            // }
             // Check for token in the response and store it in localStorage
-            if (response.data.token) {
-                // localStorage.setItem('token', response.data.token);
-                // console.log("Token saved in localStorage:", response.data.token); // Debugging line
-                auth.login(email, response.data.userId, response.data.token); // Update context if needed
+            if (token) {
+                auth.login(email, userId, userName, token);
+                // console.log("Login called with:", email, userId, userName, token);
+
             } else {
                 console.error("No token received in the login response");
             }
     
             // console.log("Successfully Logged In");
-    
-            // Pass email, userId, and token to auth.login
-            // auth.login(email, responseData.userId, token);
             navigate('/petselection');
         } catch (err) {
             setError(err.message || 'Something went wrong');

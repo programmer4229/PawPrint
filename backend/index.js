@@ -17,8 +17,8 @@ const {
     SharedPets
 } = require('./src/models/index');
 
-console.log("Associations for User:", User.associations);
-console.log("Associations for Pet:", Pet.associations);
+// console.log("Associations for User:", User.associations);
+// console.log("Associations for Pet:", Pet.associations);
 
 const userRoutes = require('./src/routes/userRoutes');
 const petRoutes = require('./src/routes/petRoutes');

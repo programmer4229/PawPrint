@@ -23,7 +23,7 @@ client.connect()
 
 const generateToken = (userId) => {
   const secret = process.env.JWT_SECRET;
-  return jwt.sign({ id: userId }, secret, { expiresIn: '24h' });
+  return jwt.sign({ id: userId }, secret, { expiresIn: '1h' });
 };
 
 async function registerUser(req, res, next) {
@@ -61,7 +61,11 @@ async function loginUser(req, res, next) {
     const isMatch = await bcrypt.compare(password, user.password);
     if (isMatch) {
       const token = generateToken(user.id);
-      res.json({ userId: user.id, token });
+      res.json({
+        userId: user.id,
+        userName: user.name,
+        token
+      });
     } else {
       res.status(401).json({ message: 'Invalid password' });
     }

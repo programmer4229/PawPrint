@@ -4,15 +4,16 @@ import PetProfile from './PetProfile';
 import { AuthContext } from '../shared/context/auth-context';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import dogProfileImage from './dogProfilePic.jpg';
+import catProfileImage from './catProfilePic.jpeg';
 
 
 const PetSelectionPage = () => {
   const [selectedPet, setSelectedPet] = useState(null);
   const auth = useContext(AuthContext);
-  const { email, isLoggedIn, userId } = auth;
+  const { email, userId, userName } = auth;
+  // console.log("User's name from AuthContext:", userName);
   const navigate = useNavigate();
-
-  // console.log("AuthContext values in ProfileSelection:", { isLoggedIn, email }); // Debugging log
 
   const [pets, setPets] = useState([]);
   const [sharedPets, setSharedPets] = useState([]);  // pet profiles shared with user
@@ -21,7 +22,7 @@ const PetSelectionPage = () => {
     const fetchPets = async () => {
       try {
         const token = localStorage.getItem('token');
-        // console.log("Token in localStorage (ProfileSelection.jsx):", token);
+        // console.log("Retrieved token from localStorage:", token);
 
         const config = {
           headers: {
@@ -35,12 +36,12 @@ const PetSelectionPage = () => {
         // Fetch user's own pets
         const ownPetsResponse = await axios.get(`http://localhost:51007/pets/get`, config);
         setPets(ownPetsResponse.data);
-        console.log("Own pets:", ownPetsResponse.data);
+        // console.log("Own pets:", ownPetsResponse.data);
 
         // Fetch shared pets
         const sharedPetsResponse = await axios.get('http://localhost:51007/pets/shared', config);
         setSharedPets(sharedPetsResponse.data);
-        console.log("Shared pets:", sharedPetsResponse.data);
+        // console.log("Shared pets:", sharedPetsResponse.data);
       } catch (error) {
           console.error('Error fetching pets:', error);
       }
@@ -62,7 +63,7 @@ const PetSelectionPage = () => {
 
   return (
     <div className="min-h-screen bg-orange-100">
-      <Navbar />
+      <Navbar name={userName} />
 
       <main className="container mx-auto p-4 min-h-screen flex items-center justify-center">
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-12">
@@ -70,7 +71,17 @@ const PetSelectionPage = () => {
             <div key={pet.id} className="flex flex-col items-center" onClick={() => handlePetClick(pet)}>
               <div className={`w-32 h-32 rounded-full overflow-hidden mb-2 cursor-pointer
                   ${isSharedPet(pet) ? 'border-purple-500' : 'border-orange-500'} border-4`}>
-                <img src={pet.image} alt={pet.name} className="w-full h-full object-cover" />
+                <img
+                  src={
+                    pet.image 
+                        ? `data:image/jpeg;base64,${pet.image}`
+                        : pet.type.toLowerCase() === 'dog'
+                            ? dogProfileImage
+                            : catProfileImage
+                  }
+                  alt={pet.name}
+                  className="w-full h-full object-cover"
+                />
               </div>
               <p className="text-lg font-semibold">{pet.name}</p>
             </div>

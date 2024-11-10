@@ -1,12 +1,21 @@
-import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from "../shared/context/auth-context";
 
 const Navbar = ({ onNavigate }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { userName, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
+
+  const handleLogout = () => {
+    logout();
+    navigate('/signin');
+    navigate(0);  // Force reload to clear any cached data
+  };  
 
   return (
     <nav className="bg-orange-500 text-white relative">
@@ -16,6 +25,7 @@ const Navbar = ({ onNavigate }) => {
             <h1 className="text-2xl font-bold">PawPrint</h1>
           </div>
           <div className="flex items-center">
+            <span className="text-white font-semibold">{userName || 'User'}</span>
             <button
               onClick={toggleMenu}
               className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
@@ -43,11 +53,12 @@ const Navbar = ({ onNavigate }) => {
           >
             <Link to='/petselection'>Pet Profiles</Link>
           </div>
-          <div
-            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 hover:text-orange-900"
+          <button
+            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 hover:text-orange-900 cursor-pointer"
+            onClick={handleLogout}  // Call handleLogout on click
           >
-            <Link to='/signin'>Sign Out</Link>
-          </div>
+            Sign Out
+          </button>
         </div>
       )}
     </nav>

@@ -1,27 +1,37 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import logo from './logo.svg';
-import './App.css';
+import { createBrowserRouter } from 'react-router-dom';
 import SignIn from './components/SignIn';
-import PetProfile from './components/PetProfile';
 import PetSelectionPage from './components/ProfileSelection';
+import PetProfile from './components/PetProfile';
+import Register from './components/Register';
+import ProtectedRoute from './shared/context/ProtectedRoutes';
 
-
-function App() {
-  return (
-    <Router>
-      <Routes>
-        {/* Route for Sign In page */}
-        <Route path="/" element={<SignIn />} />
-
-        {/* Route for selecting a pet (e.g., after signing in) */}
-        <Route path="/select-pet" element={<PetSelectionPage />} />
-
-        {/* Dynamic route for a specific pet profile by ID */}
-        <Route path="/pet/:petId" element={<PetProfile />} />
-      </Routes>
-    </Router>
-  );
-}
-
-export default App;
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <SignIn />,
+  },
+  {
+    path: '/signin',
+    element: <SignIn />,
+  },
+  {
+    path: '/petselection',
+    element: (
+      <ProtectedRoute>
+        <PetSelectionPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/petprofile/:petId',
+    element: (
+      <ProtectedRoute>
+        <PetProfile />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/register',
+    element: <Register />,
+  },
+]);
