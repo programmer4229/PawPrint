@@ -4,11 +4,15 @@ import Navbar from './Navbar';
 import PetProfile from './PetProfile';
 import PetSelectionPage from './ProfileSelection';
 import { AuthContext } from '../shared/context/auth-context';
+import axios from 'axios';
+
 
 function SignIn() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
+
+    const [error, setError] = useState(null);
 
     const auth = useContext(AuthContext);
     const [isLoggedIn, setIsLoggedIn] = useState(true);
@@ -21,27 +25,38 @@ function SignIn() {
     const submitHandler = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:51007/users/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    email,
-                    password
-                })
-            });
-            const responseData = await response.json();
+            const response = await axios.post('http://localhost:51007/users/login', { email, password });
+            const { userId, token } = response.data;
+
+            // const response = await fetch('http://localhost:51007/users/login', {
+            //     method: 'POST',
+            //     headers: { 'Content-Type': 'application/json' },
+            //     body: JSON.stringify({
+            //         email,
+            //         password
+            //     })
+            // });
+            // const responseData = await response.json();
     
-            if (!response.ok) {
-                throw new Error(responseData.message);
+            // if (!response.ok) {
+            //     throw new Error(responseData.message);
+            // }
+            // Check for token in the response and store it in localStorage
+            if (response.data.token) {
+                // localStorage.setItem('token', response.data.token);
+                // console.log("Token saved in localStorage:", response.data.token); // Debugging line
+                auth.login(email, response.data.userId, response.data.token); // Update context if needed
+            } else {
+                console.error("No token received in the login response");
             }
     
-            console.log("Successfully Logged In");
+            // console.log("Successfully Logged In");
     
-            // Pass email and userId to auth.login
-            auth.login(email, responseData.userId);
+            // Pass email, userId, and token to auth.login
+            // auth.login(email, responseData.userId, token);
             navigate('/petselection');
-        } catch (error) {
-            console.log(error);
+        } catch (err) {
+            setError(err.message || 'Something went wrong');
         }
     };
     

@@ -25,12 +25,14 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  const login = (userEmail, userId) => {
+  const login = (userEmail, userId, token) => {
     setIsLoggedIn(true);
     setEmail(userEmail);
     setUserId(userId);
-    localStorage.setItem("userEmail", userEmail); // Store in localStorage for persistence
+    localStorage.setItem("userEmail", userEmail);
     localStorage.setItem("userId", userId);
+    localStorage.setItem("token", token);
+    console.log("Token saved in localStorage:", token);
   };
 
   const logout = () => {

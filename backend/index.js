@@ -4,13 +4,21 @@ const app = express();
 const sequelize = require('./src/config/database');
 const cors = require('cors');
 
+// require('./src/models/index');
 
-require('./src/models/Pets');
-require('./src/models/Users');
-require('./src/models/MedicalHistory');
-require('./src/models/FoodInfo');
-require('./src/models/Appointments');
+const {
+    User,
+    Pet,
+    Meal,
+    Appointment,
+    AdoptionInfo,
+    Vaccination,
+    Medication,
+    SharedPets
+} = require('./src/models/index');
 
+console.log("Associations for User:", User.associations);
+console.log("Associations for Pet:", Pet.associations);
 
 const userRoutes = require('./src/routes/userRoutes');
 const petRoutes = require('./src/routes/petRoutes');
@@ -26,12 +34,13 @@ app.use(cors(
 app.use(express.json());
 
 app.use('/users', userRoutes);
+// app.use('/pets', petRoutes);
 app.use('/pets', (req, res, next) => {
     console.log("Pet route accessed with path:", req.path);
     next();
 }, petRoutes);
-app.use('/appointments', appointmentRoutes);
 
+app.use('/appointments', appointmentRoutes);
 
 
 sequelize.sync({ force: false }).then(() => {
