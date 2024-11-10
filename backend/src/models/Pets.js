@@ -35,7 +35,8 @@ const Pet = sequelize.define('Pet', {
         field: 'careinstructions'
     },
     image: {
-        type: DataTypes.STRING,
+        type: DataTypes.BLOB('long'),
+        allowNull: true,
     },
     adoptionStatus: {
         type: DataTypes.STRING,
