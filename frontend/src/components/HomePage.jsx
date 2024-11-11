@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import groupPetImage from './biggrouppets.jpg';
 import recordsFeatureImage from './recordsFeature.jpeg';
 import weightFeature from './weightFeature.png';
+import servicesFeature from './servicesFeature.png';
 
 
 
@@ -103,7 +104,7 @@ const HomePage = () => {
 <div className="bg-orange-50 rounded-xl overflow-hidden shadow-lg transition duration-300 hover:shadow-xl">
   <div className="aspect-[4/3] relative overflow-hidden">
     <img
-      src={groupPetImage}
+      src={servicesFeature}
       alt="Appointment Reminders"
       className="absolute inset-0 w-full h-full object-cover transform hover:scale-105 transition duration-500"
     />
