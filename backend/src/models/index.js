@@ -4,6 +4,7 @@ const sequelize = require('../config/database');
 const User = require('./Users');
 const Pet = require('./Pets');
 const Meal = require('./FoodInfo');
+const PetWeight = require('./PetWeight');
 const Appointment = require('./Appointments');
 const SharedPets = require('./SharedPets');
 const { AdoptionInfo, Vaccination, Medication } = require('./MedicalHistory');
@@ -23,6 +24,9 @@ Meal.belongsTo(Pet, { foreignKey: 'petId' });
 // a pet can have many appointments
 Appointment.belongsTo(Pet, { foreignKey: 'petId' });
 Pet.hasMany(Appointment, { foreignKey: 'petId' });
+// a pet can have many weights
+Pet.hasMany(PetWeight, { foreignKey: 'petId', as: 'petWeights' });
+PetWeight.belongsTo(Pet, { foreignKey: 'petId' });
 // for Sequelize to recognize SharedPets as the pivot model for User and Pet
 SharedPets.belongsTo(User, { foreignKey: 'userId' });
 SharedPets.belongsTo(Pet, { foreignKey: 'petId' });
