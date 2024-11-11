@@ -1,4 +1,4 @@
-const { DataTypes } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const Pet = require('./Pets');
 
@@ -10,7 +10,7 @@ const User = sequelize.define('User', {
     },
     type: {
         type: DataTypes.STRING,
-        allowNull: false,
+        defaultValue: 'Owner',
     },
     name: {
         type: DataTypes.STRING,
@@ -31,10 +31,11 @@ const User = sequelize.define('User', {
     },
     address: {
         type: DataTypes.STRING,
-    },
+    }
+}, {
+    tableName: 'users',
+    timestamps: false
 });
 
-User.hasMany(Pet, { foreignKey: 'ownerId' });
-Pet.belongsTo(User, { foreignKey: 'ownerId' });
 
 module.exports = User;

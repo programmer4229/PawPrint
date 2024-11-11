@@ -1,12 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
+import { createBrowserRouter } from 'react-router-dom';
 import SignIn from './components/SignIn';
-import PetProfile from './components/PetProfile';
 import PetSelectionPage from './components/ProfileSelection';
+import PetProfile from './components/PetProfile';
+import Register from './components/Register';
+import ProtectedRoute from './shared/context/ProtectedRoutes';
+import HomePage from './components/HomePage';
 
-
-function App() {
-  return <SignIn />;
-}
-
-export default App;
+export const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <HomePage />,
+  },
+  {
+    path: '/signin',
+    element: <SignIn />,
+  },
+  {
+    path: '/petselection',
+    element: (
+      <ProtectedRoute>
+        <PetSelectionPage />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/petprofile/:petId',
+    element: (
+      <ProtectedRoute>
+        <PetProfile />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/register',
+    element: <Register />,
+  },
+]);

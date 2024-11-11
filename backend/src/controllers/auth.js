@@ -1,13 +1,15 @@
 const { Client } = require('pg');
 const bcrypt = require('bcrypt');
 const fs = require('fs');
+const User = require('../models/Users');
+const jwt = require('jsonwebtoken');
 
 const client = new Client({
-  host: 'database-1.cd6ky6cymg3c.us-east-2.rds.amazonaws.com',
-  user: 'admin_test',
-  password: 'AlmostFullAdmin07?',
-  database: 'testdb',
-  port: 54327,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
   ssl: {
     rejectUnauthorized: true, // Reject unauthorized SSL certificates
     ca: fs.readFileSync('./us-east-2-bundle.pem').toString(), // Read the downloaded certificate
@@ -21,56 +23,58 @@ client.connect()
 
 const generateToken = (userId) => {
   const secret = process.env.JWT_SECRET;
-  return jwt.sign({ id: userId }, secret, { expiresIn: '24h' });
+  return jwt.sign({ id: userId }, secret, { expiresIn: '1h' });
 };
 
-async function registerUser(username, password) {
+async function registerUser(req, res, next) {
   try {
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+      const passwordHash = await bcrypt.hash(req.body.password, 10);
+      
+      const user = await User.create(
+          {
+              name: req.body.name,
+              email: req.body.email,
+              password: passwordHash,
+              phone: req.body.phone,
+              address: req.body.address,
+              // include `type` if it's provided, else default to "Owner"
+              ...(req.body.type && { type: req.body.type })
+          },
+          { fields: ['name', 'email', 'password', 'phone', 'address', 'type'] }
+      );
 
-    const query = 'INSERT INTO users (username, password_hash) VALUES ($1, $2) RETURNING id';
-    const values = [username, passwordHash];
-
-    const res = await client.query(query, values);
-    console.log('User registered with ID:', res.rows[0].id);
+      res.json({ message: 'User registered successfully' });
   } catch (err) {
-    console.error('Error registering user:', err);
+      console.error("Error registering user:", err);
+      res.status(500).json({ message: err.message });
   }
 }
 
-async function loginUser(username, password) {
-    try {
-      const query = 'SELECT password_hash FROM users WHERE username = $1';
-      const values = [username];
-  
-      const res = await client.query(query, values);
-  
-      if (res.rows.length === 0) {
-        console.log('User not found');
-        return false;
-      }
-  
-      const passwordHash = res.rows[0].password_hash;
-  
-      const isMatch = await bcrypt.compare(password, passwordHash);
-  
-      if (isMatch) {
-        console.log('Login successful');
-        return true;
-      } else {
-        console.log('Invalid password');
-        return false;
-      }
-    } catch (err) {
-      console.error('Error logging in user:', err);
-      return false;
+async function loginUser(req, res, next) {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      res.status(401).json({ message: 'User not found' });
+      return;
     }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (isMatch) {
+      const token = generateToken(user.id);
+      res.json({
+        userId: user.id,
+        userName: user.name,
+        token
+      });
+    } else {
+      res.status(401).json({ message: 'Invalid password' });
+    }
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
+}
   
 module.exports = {
   registerUser,
   loginUser,
 };
-// registerUser('chrispark2003', '123456');
-// loginUser('chrispark2003', '12345'); 
