@@ -4,11 +4,12 @@ import PetSelectionPage from './components/ProfileSelection';
 import PetProfile from './components/PetProfile';
 import Register from './components/Register';
 import ProtectedRoute from './shared/context/ProtectedRoutes';
+import HomePage from './components/HomePage';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <SignIn />,
+    element: <HomePage />,
   },
   {
     path: '/signin',
