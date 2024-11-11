@@ -18,6 +18,11 @@ router.get('/profile/:id/adoption', authMiddleware, petControllers.getAdoptionIn
 router.get('/profile/:id/vaccination', authMiddleware, petControllers.getVaccinations);
 router.get('/profile/:id/medication', authMiddleware, petControllers.getMedications);
 
+// route to get weights for a specific pet
+router.get('/profile/:id/weights', authMiddleware, petControllers.getPetWeights);
+// pet route to add pet weights
+router.post('/profile/:id/add-weight', authMiddleware, petControllers.addPetWeight);
+
 // route to share pet profile with another user by email
 router.post('/share', authMiddleware, petControllers.sharePetProfile);
 

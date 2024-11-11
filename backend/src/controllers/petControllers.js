@@ -2,6 +2,7 @@ const Pet = require('../models/Pets');
 const User = require('../models/Users');
 const { AdoptionInfo, Vaccination, Medication } = require('../models/MedicalHistory');
 const SharedPets = require('../models/SharedPets');
+const PetWeight = require('../models/PetWeight');
 
 
 async function createPet(req, res, next) {
@@ -212,10 +213,65 @@ async function uploadPetImage(req, res) {
         // Update the image field in the database
         await pet.update({ image: imageBuffer });
 
-        res.json({ message: "Pet profile picture updated successfully!" });
+        // Convert the updated image to Base64
+        const imagePath = imageBuffer.toString('base64');
+
+        res.json({
+            message: "Pet profile picture updated successfully!",
+            imagePath: imagePath // Return the updated image as Base64 (to update image as soon as its uploaded)
+        });
     } catch (err) {
         console.error("Error updating pet image:", err);
         res.status(500).json({ message: "Failed to update pet profile picture" });
+    }
+}
+
+async function getPetWeights(req, res) {
+    const petId = req.params.id;
+    // console.log("Pet ID:", petId);
+
+    try {
+        const weights = await PetWeight.findAll({
+            where: { petId: petId },
+            order: [['date', 'ASC']],  //  ascending order
+        });
+
+        if (!weights) {
+            return res.status(404).json({ message: 'No weights found for this pet' });
+        }
+
+        res.json(weights);
+    } catch (error) {
+        console.error('Error fetching pet weights:', error);
+        res.status(500).json({ message: 'Could not retrieve weights' });
+    }
+}
+
+async function addPetWeight(req, res) {
+    const { id: petId } = req.params;
+    const { weight, date } = req.body;
+    // console.log("Pet ID:", petId);
+    // console.log("Pet weight:", weight);
+    // console.log("Weight date:", date);
+
+    try {
+        const pet = await Pet.findByPk(petId);
+        if (!pet) {
+            return res.status(404).json({ message: "Pet not found" });
+        }
+
+        // Check if user is the owner
+        if (pet.ownerId !== req.user.id) {
+            return res.status(403).json({ message: "You do not have permission to add a weight to this pet" });
+        }
+        // console.log("pet.ownerid:", pet.ownerId);
+        // console.log("userId:", req.user.id);
+
+        const newWeight = await PetWeight.create({ petId, weight, date });
+        res.status(201).json(newWeight);
+    } catch (err) {
+        console.error("Error adding weight:", err);
+        res.status(500).json({ message: "Internal server error" });
     }
 }
 
@@ -231,5 +287,7 @@ module.exports = {
     getMedications,
     sharePetProfile,
     getSharedPetProfiles,
-    uploadPetImage
+    uploadPetImage,
+    getPetWeights,
+    addPetWeight
 };

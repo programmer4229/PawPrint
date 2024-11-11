@@ -37,11 +37,13 @@ const PetProfile = () => {
   const { userId } = useContext(AuthContext);
   const { petId } = useParams();
 
-  // pet info
+  // for pet info
   const [petData, setPetData] = useState(null);
   const [adoptionInfo, setAdoptionInfo] = useState(null);
   const [vaccinations, setVaccinations] = useState([]);
   const [medications, setMedications] = useState([]);
+  const [weightData, setWeightData] = useState([]);
+
   // for pet image
   const [selectedFile, setSelectedFile] = useState(null);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
@@ -51,6 +53,7 @@ const PetProfile = () => {
   const [shareStatus, setShareStatus] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
+
   // for read-only access to shared pet profiles
   const [isOwner, setIsOwner] = useState(false);
 
@@ -140,11 +143,25 @@ const PetProfile = () => {
     }
   };
 
+  const fetchWeights = async () => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`http://localhost:51007/pets/profile/${petId}/weights`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        setWeightData(response.data);
+        console.log("Fetched weights:", response.data);
+    } catch (error) {
+        console.error("Error fetching weights:", error);
+    }
+  };
+
   useEffect(() => {
     fetchPetData();
     fetchAdoptionInfo();
     fetchVaccinations();
     fetchMedications();
+    fetchWeights();
   }, [petId]);
 
   // Handle file selection
@@ -152,7 +169,7 @@ const PetProfile = () => {
     setSelectedFile(event.target.files[0]);
   };
 
-  // Handle file upload
+  // Handle file upload (for pet's profile pic)
   const handleUpload = async () => {
     if (!selectedFile) return;
     
@@ -167,6 +184,8 @@ const PetProfile = () => {
           'Content-Type': 'multipart/form-data',
         },
       });
+      
+      // Update petData with the new image URL to display immediately
       setPetData({ ...petData, image: response.data.imagePath }); // Update pet image
       setSelectedFile(null);
       setIsUploadModalOpen(false);  // Close modal after uploading
@@ -223,14 +242,6 @@ const PetProfile = () => {
   const closeModal = () => {
     setIsModalOpen(false);
     setShareEmail(''); // Clear the email input
-  };
-
-  // Function to update pet's weight data
-  const updatePetWeight = (updatedWeightData) => {
-    setPetData((prevPet) => ({
-      ...prevPet,
-      weightData: updatedWeightData,
-    }));
   };
 
   // Function to update pet services
@@ -331,14 +342,6 @@ const PetProfile = () => {
               </div>
             )}
           </div>
-
-          {/* Only allow owner to upload a new profile picture */}
-          {/* {isOwner && (
-            <div>
-              <input type="file" onChange={handleFileChange} />
-              <button onClick={handleUpload} className="bg-blue-500 text-white px-4 py-2 rounded">Upload Picture</button>
-            </div>
-          )} */}
 
           {/* Pet general info display */}
           <h2 className="text-2xl font-bold">{petData.name}</h2>
@@ -482,7 +485,7 @@ const PetProfile = () => {
         {activeTab === 'nutrition' && (
           <div>
             <h3 className="text-lg font-semibold mb-2">Nutrition Information</h3>
-            <NutritionTab pet={petData} updatePetWeight={updatePetWeight}/>
+            <NutritionTab pet={{petData, weightData}} isOwner={isOwner} refreshWeights={fetchWeights} />
           </div>
         )}
 

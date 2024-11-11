@@ -1,21 +1,32 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const NutritionTab = ({ pet, updatePetWeight }) => {
-  const [newWeight, setNewWeight] = useState('');
+const NutritionTab = ({ pet, isOwner, refreshWeights }) => {
+  const [weight, setWeight] = useState('');
+  const [date, setDate] = useState('');
 
-  const handleAddWeight = () => {
-    if (newWeight && !isNaN(newWeight)) {
-      const today = new Date().toISOString().split('T')[0];
-      const updatedWeightData = [
-        ...pet.weightData,
-        { date: today, weight: parseFloat(newWeight) }
-      ];
-      updatePetWeight(updatedWeightData);
-      setNewWeight('');
+  const handleAddWeight = async () => {
+    try {
+        const token = localStorage.getItem('token');
+        await axios.post(`http://localhost:51007/pets/profile/${pet.petData.id}/add-weight`, {
+            weight: parseFloat(weight),
+            date
+        }, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        refreshWeights(); // Refresh weights after adding a new one
+        setWeight('');
+        setDate('');
+    } catch (error) {
+        console.error("Error adding weight:", error);
     }
   };
-  console.log(pet);
+  // console.log(pet);
+  
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
@@ -32,21 +43,30 @@ const NutritionTab = ({ pet, updatePetWeight }) => {
             </LineChart>
           </ResponsiveContainer>
         </div>
-        <div className="mt-4 flex space-x-2">
-          <input
-            type="number"
-            value={newWeight}
-            onChange={(e) => setNewWeight(e.target.value)}
-            placeholder="Enter weight"
-            className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-          />
-          <button
-            onClick={handleAddWeight}
-            className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
-          >
-            Add Weight
-          </button>
-        </div>
+        {/* Only show the add weight form if user is the owner */}
+        {isOwner && (
+          <div className="mt-4 flex space-x-2">
+            <input
+              type="number"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              placeholder="Enter weight (lbs)"
+              className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="flex-grow px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
+            />
+            <button
+              onClick={handleAddWeight}
+              className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+            >
+              Add Weight
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
