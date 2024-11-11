@@ -3,6 +3,7 @@ import Navbar from './Navbar';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
 import NutritionTab from './NutritionTab';
+import ServicesTab from './ServicesTab';
 import { AuthContext } from '../shared/context/auth-context';
 import dogProfileImage from './dogProfilePic.jpg';
 import catProfileImage from './catProfilePic.jpeg';
@@ -229,6 +230,14 @@ const PetProfile = () => {
     setPetData((prevPet) => ({
       ...prevPet,
       weightData: updatedWeightData,
+    }));
+  };
+
+  // Function to update pet services
+  const updateServices = (updatedServices) => {
+    setPetData((prevPet) => ({
+      ...prevPet,
+      services: updatedServices,
     }));
   };
 
@@ -480,8 +489,7 @@ const PetProfile = () => {
         {/* Services Tab */}
         {activeTab === 'services' && (
           <div>
-            <h3 className="text-lg font-semibold mb-2">Services</h3>
-            <p>Information about pet services and appointments for {petData.name} will be shown here.</p>
+            <ServicesTab pet={petData} updateServices={updateServices}/>
           </div>
         )}
       </div>
