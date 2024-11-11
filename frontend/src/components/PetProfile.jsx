@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Navbar from './Navbar';
 import NutritionTab from './NutritionTab';
+import ServicesTab from './ServicesTab';
 
 const PetProfile = ({ pet }) => {
   const [activeTab, setActiveTab] = useState('medical');
@@ -25,6 +26,13 @@ const PetProfile = ({ pet }) => {
     setPet((prevPet) => ({
       ...prevPet,
       weightData: updatedWeightData,
+    }));
+  };
+
+  const updateServices = (updatedServices) => {
+    setPet((prevPet) => ({
+      ...prevPet,
+      services: updatedServices,
     }));
   };
 
@@ -136,8 +144,7 @@ const PetProfile = ({ pet }) => {
 
           {activeTab === 'services' && (
             <div>
-              <h3 className="text-lg font-semibold mb-2">Services</h3>
-              <p>Information about pet services and appointments for {petData.name} will be shown here.</p>
+              <ServicesTab pet={selectedPet} updateServices={updateServices}/>
             </div>
           )}
         </div>
