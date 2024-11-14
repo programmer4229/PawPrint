@@ -2,8 +2,8 @@ const { Sequelize } = require('sequelize');
 
 const sequelize = new Sequelize('testdb', 'admin_test', 'AlmostFullAdmin07?', {
     dialect: 'postgres',
-    host: 'database-1.cd6ky6cymg3c.us-east-2.rds.amazonaws.com',
-    port: 54327,
+    host: process.env.DB_HOST,ase: process.env.DB_NAME,
+    port: process.env.DB_PORT,
     logging: false,
     dialectOptions: {
       ssl: {

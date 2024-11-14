@@ -5,11 +5,11 @@ const express = require('express');
 const router = express.Router();
 
 const client = new Client({
-  host: 'database-1.cd6ky6cymg3c.us-east-2.rds.amazonaws.com',
-  user: 'admin_test',
-  password: 'AlmostFullAdmin07?',
-  database: 'testdb',
-  port: 54327,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT,
   ssl: {
     rejectUnauthorized: true,
     ca: fs.readFileSync('./us-east-2-bundle.pem').toString(),
