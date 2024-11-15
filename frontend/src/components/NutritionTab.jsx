@@ -9,7 +9,7 @@ const NutritionTab = ({ pet, isOwner, refreshWeights }) => {
   const handleAddWeight = async () => {
     try {
         const token = localStorage.getItem('token');
-        await axios.post(`http://localhost:51007/pets/profile/${pet.petData.id}/add-weight`, {
+        await axios.post(`${process.env.REACT_APP_API_BASE_URL}/pets/profile/${pet.petData.id}/add-weight`, {
             weight: parseFloat(weight),
             date
         }, {

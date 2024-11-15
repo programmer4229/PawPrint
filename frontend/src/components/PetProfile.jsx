@@ -63,7 +63,7 @@ const PetProfile = () => {
     const token = localStorage.getItem('token');
     // console.log("Retrieved token from localStorage:", token);
     try {
-      const response = await axios.get(`http://localhost:51007/pets/profile/${petId}`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/profile/${petId}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -83,7 +83,7 @@ const PetProfile = () => {
   const fetchAdoptionInfo = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`http://localhost:51007/pets/profile/${petId}/adoption`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/profile/${petId}/adoption`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -101,7 +101,7 @@ const PetProfile = () => {
   const fetchVaccinations = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`http://localhost:51007/pets/profile/${petId}/vaccination`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/profile/${petId}/vaccination`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -124,7 +124,7 @@ const PetProfile = () => {
   const fetchMedications = async () => {
     const token = localStorage.getItem('token');
     try {
-      const response = await axios.get(`http://localhost:51007/pets/profile/${petId}/medication`, {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/profile/${petId}/medication`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ const PetProfile = () => {
   const fetchWeights = async () => {
     const token = localStorage.getItem('token');
     try {
-        const response = await axios.get(`http://localhost:51007/pets/profile/${petId}/weights`, {
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/profile/${petId}/weights`, {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         setWeightData(response.data);
@@ -178,7 +178,7 @@ const PetProfile = () => {
     formData.append("image", selectedFile);
 
     try {
-      const response = await axios.post(`http://localhost:51007/pets/${petId}/upload`, formData, {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/pets/${petId}/upload`, formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
@@ -210,7 +210,7 @@ const PetProfile = () => {
       // console.log("petId:", petId);
       // console.log("target email:", shareEmail);
       const response = await axios.post(
-        'http://localhost:51007/pets/share',
+        `${process.env.REACT_APP_API_BASE_URL}/pets/share`,
         {
         petId,
         targetEmail: shareEmail,

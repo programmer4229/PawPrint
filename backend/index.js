@@ -1,4 +1,4 @@
-require('dotenv').config();
+require('dotenv').config({ path: process.env.ENV_PATH });
 const express = require('express');
 const app = express();
 const sequelize = require('./src/config/database');
@@ -25,28 +25,39 @@ const petRoutes = require('./src/routes/petRoutes');
 const appointmentRoutes = require('./src/routes/appointmentRoutes');
 
 
-app.use(cors(
-    {
-        origin: 'http://localhost:3000',
-        credentials: true
+// Parse CORS origins
+const parseCorsOrigins = (origins) => {
+    if (!origins) return false; // Disable CORS if no origin is provided
+    if (origins.includes(',')) {
+        return origins.split(',').map((origin) => origin.trim());
     }
-));
+    return origins;
+};
+
+// CORS Configuration
+app.use(cors({
+    origin: parseCorsOrigins(process.env.CORS_ORIGIN),
+    credentials: true,
+}));
+
+// Middleware to parse JSON
 app.use(express.json());
 
-app.use('/users', userRoutes);
+app.use('/api/users', userRoutes);
 // app.use('/pets', petRoutes);
-app.use('/pets', (req, res, next) => {
+app.use('/api/pets', (req, res, next) => {
     console.log("Pet route accessed with path:", req.path);
     next();
 }, petRoutes);
 
-app.use('/appointments', appointmentRoutes);
+app.use('/api/appointments', appointmentRoutes);
 
 
 sequelize.sync({ force: false }).then(() => {
     console.log('Database connected');
-    app.listen(process.env.PORT, () => {
-        console.log(`Server is running on port ${process.env.PORT}`);
+    const port = process.env.PORT || 3001;
+    app.listen(port, () => {
+        console.log(`Server is running on port ${port}`);
     });
 })
 .catch(err => console.log(err));

@@ -11,8 +11,8 @@ const client = new Client({
   database: process.env.DB_NAME,
   port: process.env.DB_PORT,
   ssl: {
-    rejectUnauthorized: true, // Reject unauthorized SSL certificates
-    ca: fs.readFileSync('./us-east-2-bundle.pem').toString(), // Read the downloaded certificate
+    rejectUnauthorized: false, // Reject unauthorized SSL certificates
+    // ca: fs.readFileSync('./us-east-2-bundle.pem').toString(), // Read the downloaded certificate
   },
 });
 
