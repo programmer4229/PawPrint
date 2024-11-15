@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
@@ -56,6 +57,10 @@ const PetProfile = () => {
 
   // for read-only access to shared pet profiles
   const [isOwner, setIsOwner] = useState(false);
+
+  // for deleting pet
+  const navigate = useNavigate();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
 
   // Fetch pet data by ID
@@ -164,6 +169,32 @@ const PetProfile = () => {
     fetchWeights();
   }, [petId]);
 
+  // delete pet
+  const handleDeletePet = async () => {
+    const token = localStorage.getItem('token');
+
+    try {
+      await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/pets/profile/${petData.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      // alert('Pet deleted successfully.');
+      navigate('/petselection'); // Navigate back to the pet selection page
+    } catch (error) {
+      console.error('Error deleting pet:', error);
+      // alert('Failed to delete the pet. Please try again.');
+    }
+  };
+
+  const handleOpenDeleteModal = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleCloseDeleteModal = () => {
+    setShowDeleteModal(false);
+  };
+
   // Handle file selection
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -268,7 +299,44 @@ const PetProfile = () => {
     {/* Main Content */}
     {/* Share Pet Profile */}
     <main className="container mx-auto p-4">
-      <div className="flex justify-end mb-4">
+      <div className="flex justify-between items-center mb-4">
+      {/* Delete Button (Visible only to owner) */}
+      {isOwner && (
+        <button
+          onClick={handleOpenDeleteModal}
+          className="bg-red-500 text-white px-4 py-2 rounded-full mt-4 hover:bg-red-600 transition-colors"
+        >
+          Delete Pet
+        </button>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-96">
+            <h2 className="text-xl font-bold mb-4">Confirm Delete</h2>
+            <p className="mb-4">Are you sure you want to delete the profile of {petData.name}?</p>
+            <div className="flex justify-end">
+              <button
+                onClick={handleCloseDeleteModal}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded mr-2 hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  handleDeletePet();
+                  handleCloseDeleteModal();
+                }}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
         {isOwner && (
           <button onClick={openModal} className="bg-orange-500 text-white px-4 py-2 rounded-full hover:bg-orange-600 transition-colors">
             Share Pet Profile
@@ -318,8 +386,8 @@ const PetProfile = () => {
           {/* Profile picture display */}
           <div className={`relative w-32 h-32 rounded-full overflow-hidden mb-4 group cursor-pointer 
             ${isOwner ? 'border-orange-500' : 'border-purple-500'} border-4`}
+            // only owner can upload a profile pic for this pet
           onClick={isOwner ? openUploadModal : undefined}
-            // style={{ borderColor: isOwner ? 'border-orange-500' : 'border-purple-500' }} // Orange if user is the pet's owner, purple otherwise
           >
             <img
               src={
@@ -346,7 +414,7 @@ const PetProfile = () => {
           {/* Pet general info display */}
           <h2 className="text-2xl font-bold">{petData.name}</h2>
           <p className="text-gray-600">
-            Chip ID: {petData?.chipId || 'N/A'} | {(petData?.type).toUpperCase() || 'Unknown'} | {petData?.breed || 'Unknown'} | Age: {calculateAge(petData?.dateOfBirth) || 'Unknown'} | DOB: {petData?.dateOfBirth ? new Date(petData.dateOfBirth).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : 'Unknown'}
+            Chip ID: {petData?.chipId || 'N/A'} | {(petData?.type).toUpperCase() || 'Unknown'} | {(petData?.breed).toUpperCase() || 'Unknown'} | Age: {calculateAge(petData?.dateOfBirth) || 'Unknown'} | DOB: {petData?.dateOfBirth ? new Date(petData.dateOfBirth).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : 'Unknown'}
           </p>
         </div>
 

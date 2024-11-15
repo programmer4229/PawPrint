@@ -3,15 +3,35 @@ const User = require('../models/Users');
 const { AdoptionInfo, Vaccination, Medication } = require('../models/MedicalHistory');
 const SharedPets = require('../models/SharedPets');
 const PetWeight = require('../models/PetWeight');
+const multer = require('multer');
 
 
 async function createPet(req, res, next) {
     try {
-        const pet = await Pet.create(req.body);
-        res.json("Pet created!");
-    } catch (err) {
+        const { ownerId, userId, ...rest } = req.body;
+        let imageBuffer = null;
+    
+        if (req.file) {
+          imageBuffer = req.file.buffer;
+        }
+    
+        const pet = await Pet.create({
+          ...rest,
+          ownerId,
+          userId,
+          image: imageBuffer,
+        });
+    
+        // Convert binary image data to Base64
+        if (pet.image) {
+          pet.image = pet.image.toString('base64');
+        }
+    
+        res.status(201).json({ message: "Pet created!", pet });
+      } catch (err) {
+        console.error("Error creating pet:", err);
         res.status(500).json({ message: err.message });
-    }
+      }
 };
 
 async function getPets(req, res, next) {
@@ -57,6 +77,8 @@ async function deletePet(req, res) {
         if (pet) {
             await pet.destroy();
             res.json({ message: 'Pet deleted' });
+        } else {
+            res.status(404).json({ message: 'Pet not found' });
         }
     } catch (err) {
         res.status(500).json({ message: err.message });
