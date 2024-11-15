@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import SignIn from './SignIn';
 
 function Register() {
+    const navigate = useNavigate();
     const [showSignIn, setShowSignIn] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -13,6 +15,7 @@ function Register() {
     const [message, setMessage] = useState('');
 
     if (showSignIn) {
+        navigate('/signin');
         return <SignIn />;
     }
 
@@ -142,6 +145,7 @@ function Register() {
                         <span className="text-gray-600">Already have an account?</span>
                         <button 
                             className="text-orange-500 hover:text-orange-600 font-medium focus:outline-none focus:underline" 
+                            onClick={() => navigate('/signin')}
                         >
                             Login!
                         </button>
