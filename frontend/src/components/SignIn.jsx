@@ -15,8 +15,6 @@ function SignIn() {
     const [error, setError] = useState(null);
 
     const auth = useContext(AuthContext);
-    // console.log("AuthContext in SignIn.jsx:", auth);
-    const [isLoggedIn, setIsLoggedIn] = useState(true);
 
     const login = useCallback(() => {
         auth.login();
