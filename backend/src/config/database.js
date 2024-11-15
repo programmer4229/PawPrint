@@ -1,13 +1,13 @@
 const { Sequelize } = require('sequelize');
 
-const sequelize = new Sequelize('testdb', 'admin_test', 'AlmostFullAdmin07?', {
+const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
     dialect: 'postgres',
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
     logging: false,
     dialectOptions: {
       ssl: {
-        require: true, // If your RDS instance requires SSL
+        require: false, // If your RDS instance requires SSL
         rejectUnauthorized: false, // Allows self-signed certificates
       },
     },

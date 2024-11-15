@@ -34,12 +34,12 @@ const PetSelectionPage = () => {
         };
 
         // Fetch user's own pets
-        const ownPetsResponse = await axios.get(`http://localhost:51007/pets/get`, config);
+        const ownPetsResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/get`, config);
         setPets(ownPetsResponse.data);
         // console.log("Own pets:", ownPetsResponse.data);
 
         // Fetch shared pets
-        const sharedPetsResponse = await axios.get('http://localhost:51007/pets/shared', config);
+        const sharedPetsResponse = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/shared`, config);
         setSharedPets(sharedPetsResponse.data);
         // console.log("Shared pets:", sharedPetsResponse.data);
       } catch (error) {
