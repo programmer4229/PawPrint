@@ -1,13 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
+const upload = require('../middleware/upload');
 const petControllers = require('../controllers/petControllers');
 const authMiddleware = require('../middleware/authMiddleware');
 
-
-// configure Multer to store image in memory
-const storage = multer.memoryStorage(); // Set up memory storage
-const upload = multer({ storage: storage });
 
 // existing routes
 router.post('/create', authMiddleware, upload.single('image'), petControllers.createPet);
