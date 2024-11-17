@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
+import imageCompression from 'browser-image-compression';
 import Navbar from './Navbar';
 import axios from 'axios';
 import { useParams } from 'react-router-dom';
@@ -205,10 +206,20 @@ const PetProfile = () => {
     if (!selectedFile) return;
     
     const token = localStorage.getItem('token');
-    const formData = new FormData();
-    formData.append("image", selectedFile);
+    // const formData = new FormData();
+    // formData.append("image", selectedFile);
 
     try {
+      // Compress the image
+      const compressedFile = await imageCompression(selectedFile, {
+        maxSizeMB: 1, // Adjust the size limit
+        maxWidthOrHeight: 1024, // Adjust dimensions
+        useWebWorker: true,
+      });
+
+      const formData = new FormData();
+      formData.append("image", compressedFile);
+
       const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/pets/${petId}/upload`, formData, {
         headers: {
           'Authorization': `Bearer ${token}`,
