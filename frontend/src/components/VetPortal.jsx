@@ -1,8 +1,7 @@
 import React, { useState, useContext } from 'react'
 import Navbar from './Navbar';
 import { AuthContext } from '../shared/context/auth-context';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import dogPic from "./dogProfilePic.jpg";
 
 const ChevronDown = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -40,7 +39,7 @@ const VetPortal = () => {
       id: 1,
       name: 'John Doe',
       pets: [
-        { name: 'Diesel', chipId: '12345678', age: 8, breed: 'Goldendoodle', image: '/placeholder.svg?height=100&width=100' },
+        { name: 'Diesel', chipId: '12345678', age: 8, breed: 'Goldendoodle', image: dogPic },
         { name: 'Daisy', chipId: '23456789', age: 5, breed: 'Labrador', image: '/placeholder.svg?height=100&width=100' },
         { name: 'Derek', chipId: '34567890', age: 3, breed: 'German Shepherd', image: '/placeholder.svg?height=100&width=100' },
       ]
