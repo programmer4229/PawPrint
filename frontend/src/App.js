@@ -5,6 +5,7 @@ import PetProfile from './components/PetProfile';
 import Register from './components/Register';
 import ProtectedRoute from './shared/context/ProtectedRoutes';
 import HomePage from './components/HomePage';
+import VetPortal from './components/VetPortal';
 
 export const router = createBrowserRouter([
   {
