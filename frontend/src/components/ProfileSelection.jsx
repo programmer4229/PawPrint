@@ -1,4 +1,5 @@
 import React, { useState, useContext, useEffect } from 'react';
+import imageCompression from 'browser-image-compression';
 import Navbar from './Navbar';
 import PetProfile from './PetProfile';
 import { AuthContext } from '../shared/context/auth-context';
@@ -54,10 +55,20 @@ const PetSelectionPage = () => {
   };
 
   // when adding pet
-  const handleImageUpload = (e) => {
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
-    setPetData({ ...petData, image: file });
-  };  
+    try {
+      const compressedFile = await imageCompression(file, {
+        maxSizeMB: 1, // Adjust the size limit
+        maxWidthOrHeight: 1024, // Adjust dimensions
+        useWebWorker: true,
+      });
+  
+      setPetData({ ...petData, image: compressedFile });
+    } catch (error) {
+      console.error('Error compressing image:', error);
+    }
+  };
 
   const handleAddPet = async (e) => {
     e.preventDefault();
@@ -65,15 +76,16 @@ const PetSelectionPage = () => {
   
     try {
       const formData = new FormData();
+
       Object.keys(petData).forEach((key) => {
-        if (key !== 'image') {
+        // if (key !== 'image') {
           formData.append(key, petData[key]);
-        }
+        // }
       });
   
-      if (petData.image) {
-        formData.append('image', petData.image); // Add image file
-      }
+      // if (petData.image) {
+      //   formData.append('image', petData.image); // Add image file
+      // }
   
       const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/pets/create`,
@@ -151,10 +163,10 @@ const PetSelectionPage = () => {
                 <img
                   src={
                     pet.image 
-                        ? `data:image/jpeg;base64,${pet.image}`
-                        : pet.type.toLowerCase() === 'dog'
-                            ? dogProfileImage
-                            : catProfileImage
+                      ? `data:image/${pet.image.startsWith('/') ? 'png' : 'jpeg'};base64,${pet.image}`
+                      : pet.type.toLowerCase() === 'dog'
+                        ? dogProfileImage
+                        : catProfileImage
                   }
                   alt={pet.name}
                   className="w-full h-full object-cover"
@@ -232,10 +244,10 @@ const PetSelectionPage = () => {
                     placeholder="Provide any special care instructions"
                   ></textarea>
                 </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 font-medium mb-2">Upload Pet's Image</label>
+                {/* <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Upload Image</label>
                   <input type="file" onChange={handleImageUpload} />
-                </div>
+                </div> */}
                 {statusMessage && (
                   <p className="text-center text-green-500 mb-4">{statusMessage}</p>
                 )}
