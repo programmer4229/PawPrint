@@ -25,6 +25,14 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: '/vetportal',
+    element: (
+      //<ProtectedRoute>
+        <VetPortal />
+      //</ProtectedRoute>
+    ),
+  },
+  {
     path: '/petprofile/:petId',
     element: (
       <ProtectedRoute>
