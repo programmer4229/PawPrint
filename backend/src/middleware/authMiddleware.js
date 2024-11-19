@@ -3,6 +3,7 @@ const SECRET_KEY = process.env.JWT_SECRET;
 
 const authMiddleware = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1]; // Expect a "Bearer <token>" format
+    // console.log("req.headers.authorization?.split(' ')", req.headers.authorization?.split(' '));
 
     if (!token) {
         return res.status(401).json({ message: 'Authentication token required' });
