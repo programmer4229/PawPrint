@@ -1,8 +1,6 @@
 import React, { useState, useContext, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
-import PetProfile from './PetProfile';
-import PetSelectionPage from './ProfileSelection';
 import { AuthContext } from '../shared/context/auth-context';
 import axios from 'axios';
 
@@ -16,11 +14,6 @@ function SignIn() {
 
     const auth = useContext(AuthContext);
 
-    const login = useCallback(() => {
-        auth.login();
-    }
-    , [auth]);
-
     const submitHandler = async (e) => {
         e.preventDefault();
         console.log('REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
@@ -29,20 +22,25 @@ function SignIn() {
                 email,
                 password,
             });
-            const { userId, userName, token } = response.data;
-            // console.log("Login response data:", { userId, userName, token });
+            const { userId, userName, userType, token } = response.data;
+            // console.log("Login response data:", { userId, userName, userType, token });
 
             // Check for token in the response and store it in localStorage
             if (token) {
-                auth.login(email, userId, userName, token);
-                // console.log("Login called with:", email, userId, userName, token);
+                auth.login(email, userId, userName, userType, token);
+                // console.log("Login called with:", email, userId, userName, userType, token);
 
             } else {
                 console.error("No token received in the login response");
             }
     
-            // console.log("Successfully Logged In");
-            navigate('/petselection');
+            // redirect based on user type
+            if (userType === 'Owner') {
+                navigate('/petselection');
+            } else if (userType === 'Veterinarian') {
+                navigate('/vetportal');
+            }
+
         } catch (err) {
             setError(err.message || 'Something went wrong');
         }

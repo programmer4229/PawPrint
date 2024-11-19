@@ -12,6 +12,7 @@ function Register() {
     const [cfmpassword, setCfmPassword] = useState('');
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
+    const [userType, setUserType] = useState('');
     const [message, setMessage] = useState('');
 
     if (showSignIn) {
@@ -36,7 +37,8 @@ function Register() {
                     email,
                     password,
                     phone,
-                    address
+                    address,
+                    userType  // user type: owner || vet
                 })
             });
             const responseData = await response.json();
@@ -104,6 +106,23 @@ function Register() {
                                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 required
                             />
+                        </div>
+
+                        {/* Dropdown for User Type */}
+                        <div className="form-control">
+                            <label htmlFor="userType" className="block text-sm font-medium text-gray-500">
+                                User Type
+                            </label>
+                            <select
+                                name="userType"
+                                value={userType}
+                                onChange={(e) => setUserType(e.target.value)}
+                                className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                required
+                            >
+                                <option value="Owner">Owner</option>
+                                <option value="Veterinarian">Veterinarian</option>
+                            </select>
                         </div>
 
                         <div className="form-control">

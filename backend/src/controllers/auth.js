@@ -37,8 +37,7 @@ async function registerUser(req, res, next) {
               password: passwordHash,
               phone: req.body.phone,
               address: req.body.address,
-              // include `type` if it's provided, else default to "Owner"
-              ...(req.body.type && { type: req.body.type })
+              type: req.body.userType
           },
           { fields: ['name', 'email', 'password', 'phone', 'address', 'type'] }
       );
@@ -64,6 +63,7 @@ async function loginUser(req, res, next) {
       res.json({
         userId: user.id,
         userName: user.name,
+        userType: user.type,
         token
       });
     } else {

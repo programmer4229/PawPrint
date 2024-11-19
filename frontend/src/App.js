@@ -27,9 +27,9 @@ export const router = createBrowserRouter([
   {
     path: '/vetportal',
     element: (
-      //<ProtectedRoute>
+      <ProtectedRoute>
         <VetPortal />
-      //</ProtectedRoute>
+      </ProtectedRoute>
     ),
   },
   {
