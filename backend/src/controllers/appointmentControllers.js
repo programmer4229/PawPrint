@@ -11,7 +11,7 @@ async function createAppointment(req, res, next) {
 
 async function getAppointments(req, res, next) {
     try {
-        const appointments = await Appointment.findAll(pk = req.params.id);
+        const appointments = await Appointment.findAll({ where: { petId: req.query.petId } });
         res.json(appointments);
     } catch (err) {
         res.status(500).json({ message: err.message });

@@ -1,6 +1,7 @@
-import React, { useState, useContext } from 'react'
-import Navbar from './Navbar';
+import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../shared/context/auth-context';
+import axios from 'axios';
+import Navbar from './Navbar';
 import dogPic from "./dogProfilePic.jpg";
 
 const ChevronDown = () => (
@@ -34,40 +35,76 @@ const UploadIcon = () => (
 )
 
 const VetPortal = () => {
-  const [owners] = useState([
-    {
-      id: 1,
-      name: 'John Doe',
-      pets: [
-        { name: 'Diesel', chipId: '12345678', age: 8, breed: 'Goldendoodle', image: dogPic },
-        { name: 'Daisy', chipId: '23456789', age: 5, breed: 'Labrador', image: '/placeholder.svg?height=100&width=100' },
-        { name: 'Derek', chipId: '34567890', age: 3, breed: 'German Shepherd', image: '/placeholder.svg?height=100&width=100' },
-      ]
-    },
-    {
-      id: 2,
-      name: 'Jane Smith',
-      pets: [
-        { name: 'Lucy', chipId: '45678901', age: 4, breed: 'Siamese Cat', image: '/placeholder.svg?height=100&width=100' },
-        { name: 'Zeus', chipId: '56789012', age: 6, breed: 'Maine Coon', image: '/placeholder.svg?height=100&width=100' },
-        { name: 'Bella', chipId: '67890123', age: 2, breed: 'Persian Cat', image: '/placeholder.svg?height=100&width=100' },
-      ]
-    }
-  ])
+  const auth = useContext(AuthContext);
+  const { email, userId, userName, token } = auth;
 
-  const [expandedOwners, setExpandedOwners] = useState([1])
-  const [selectedPet, setSelectedPet] = useState(owners[0].pets[0])
+  const [owners, setOwners] = useState([]);
+  const [selectedPet, setSelectedPet] = useState(null);
+  const [expandedOwners, setExpandedOwners] = useState([]);
+  const [appointments, setAppointments] = useState([]);
   const [searchTerm, setSearchTerm] = useState('')
 
-  const toggleOwner = (ownerId) => {
-    setExpandedOwners(prev =>
-      prev.includes(ownerId)
-        ? prev.filter(id => id !== ownerId)
-        : [...prev, ownerId]
-    )
-  }
-  const auth = useContext(AuthContext);
-  const { email, userId, userName } = auth;
+  useEffect(() => {
+      const fetchOwners = async () => {
+        try {
+          const token = localStorage.getItem('token'); // Retrieve token from localStorage
+          const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/users/owners`, {
+              headers: {
+                  Authorization: `Bearer ${token}`,
+              },
+          });
+          console.log("Fetched Owners:", response.data);
+          setOwners(response.data);
+        } catch (error) {
+            console.error('Error fetching owners:', error);
+        }
+      };
+
+      fetchOwners();
+  }, [token]);
+
+  const fetchAppointments = async (petId) => {
+    const token = localStorage.getItem('token');
+    try {
+        const response = await axios.get(`/api/appointments/get?petId=${petId}`, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+        setAppointments(response.data);
+    } catch (error) {
+        console.error('Error fetching appointments:', error);
+    }
+  };
+
+  const toggleOwner = async (ownerId) => {
+    if (!expandedOwners.includes(ownerId)) {
+      const token = localStorage.getItem('token');
+      console.log("Token for 'toggleOwner'", token);
+      try {
+          const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/owner/${ownerId}`, {
+              headers: { Authorization: `Bearer ${token}` },
+          });
+          setOwners((prev) =>
+              prev.map((owner) =>
+                  owner.owner_id === ownerId ? { ...owner, pets: response.data } : owner
+              )
+          );
+      } catch (error) {
+          console.error('Error fetching pets:', error);
+      }
+    }
+    setExpandedOwners((prev) =>
+        prev.includes(ownerId) ? prev.filter((id) => id !== ownerId) : [...prev, ownerId]
+    );
+  };
+
+
+  const selectPet = (pet) => {
+    console.log("Select Pet:", pet);
+    setSelectedPet(pet);
+    fetchAppointments(pet.id);
+  };
+
+
   return (
     <div>
     <Navbar name={userName} />
@@ -87,32 +124,36 @@ const VetPortal = () => {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {owners.map(owner => (
-            <div key={owner.id}>
+          {owners.map((owner) => (
+            <div key={owner.owner_id}>
               <button
-                onClick={() => toggleOwner(owner.id)}
+                onClick={() => toggleOwner(owner.owner_id)}
                 className="w-full flex items-center px-4 py-2 hover:bg-orange-600 hover:text-white text-left text-orange-500"
               >
-                {expandedOwners.includes(owner.id) ? (
+                {expandedOwners.includes(owner.owner_id) ? (
                   <ChevronDown className="mr-2" />
                 ) : (
                   <ChevronRight className="mr-2" />
                 )}
-                {owner.name}
+                {owner.owner_name}
               </button>
-              {expandedOwners.includes(owner.id) && (
+              {expandedOwners.includes(owner.owner_id) && (
                 <div className="pl-8">
-                  {owner.pets.map(pet => (
-                    <button
-                      key={pet.chipId}
-                      onClick={() => setSelectedPet(pet)}
-                      className={`w-full px-4 py-2 text-left hover:bg-orange-600 hover:text-white ${
-                        selectedPet.chipId === pet.chipId ? 'bg-orange-800' : ''
-                      } text-orange-500`}
-                    >
-                      {pet.name}
-                    </button>
-                  ))}
+                  {owner.pets?.length > 0 ? (
+                    owner.pets.map((pet) => (
+                      <button
+                        key={pet.chipId}
+                        onClick={() => selectPet(pet)}
+                        className={`w-full px-4 py-2 text-left hover:bg-orange-600 hover:text-white ${
+                          selectedPet?.chipId === pet.chipId ? 'bg-orange-900' : 'N/A'
+                        } text-orange-300`}
+                      >
+                        {pet.name}
+                      </button>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No pets found.</p>
+                  )}
                 </div>
               )}
             </div>

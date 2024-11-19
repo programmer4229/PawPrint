@@ -1,6 +1,6 @@
 const express = require('express');
-const {check, validationResult} = require('express-validator');
 const User = require('../models/Users');
+const authMiddleware = require('../middleware/authMiddleware');
 const authenticationController = require('../controllers/auth');
 const userController = require('../controllers/userControllers');
 
@@ -15,6 +15,8 @@ router.get('/profile', userController.getUser);
 router.patch('/profile', userController.updateUser);
 
 router.delete('/profile', userController.deleteUser);
+
+router.get('/owners', authMiddleware, userController.getOwnersForVet);
 
 module.exports = router;
 
