@@ -2,6 +2,7 @@ import { useEffect, useState, useContext } from 'react';
 import { AuthContext } from '../shared/context/auth-context';
 import axios from 'axios';
 import Navbar from './Navbar';
+import { parseISO, format } from 'date-fns';
 import dogPic from "./dogProfilePic.jpg";
 
 const ChevronDown = () => (
@@ -36,12 +37,13 @@ const UploadIcon = () => (
 
 const VetPortal = () => {
   const auth = useContext(AuthContext);
-  const { email, userId, userName, token } = auth;
+  const { userName, token } = auth;
 
   const [owners, setOwners] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [expandedOwners, setExpandedOwners] = useState([]);
   const [appointments, setAppointments] = useState([]);
+  const [lastVisitData, setLastVisitData] = useState(null);
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
@@ -53,7 +55,7 @@ const VetPortal = () => {
                   Authorization: `Bearer ${token}`,
               },
           });
-          console.log("Fetched Owners:", response.data);
+          // console.log("Fetched Owners:", response.data);
           setOwners(response.data);
         } catch (error) {
             console.error('Error fetching owners:', error);
@@ -65,8 +67,9 @@ const VetPortal = () => {
 
   const fetchAppointments = async (petId) => {
     const token = localStorage.getItem('token');
+    // console.log("Token for 'toggleOwner'", token);
     try {
-        const response = await axios.get(`/api/appointments/get?petId=${petId}`, {
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/appointments/get?petId=${petId}`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         setAppointments(response.data);
@@ -78,32 +81,63 @@ const VetPortal = () => {
   const toggleOwner = async (ownerId) => {
     if (!expandedOwners.includes(ownerId)) {
       const token = localStorage.getItem('token');
-      console.log("Token for 'toggleOwner'", token);
       try {
-          const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/owner/${ownerId}`, {
-              headers: { Authorization: `Bearer ${token}` },
-          });
-          setOwners((prev) =>
-              prev.map((owner) =>
-                  owner.owner_id === ownerId ? { ...owner, pets: response.data } : owner
-              )
-          );
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL}/users/owners`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        // console.log("Fetched Owners with Pets:", response.data);
+  
+        setOwners((prev) =>
+          prev.map((owner) =>
+            owner.owner_id === ownerId
+              ? { ...owner, pets: response.data.find(o => o.owner_id === ownerId)?.pets || [] }
+              : owner
+          )
+        );
+        // console.log("Updated Owners with Pets:", owners);
       } catch (error) {
-          console.error('Error fetching pets:', error);
+        console.error('Error fetching pets:', error);
       }
     }
     setExpandedOwners((prev) =>
-        prev.includes(ownerId) ? prev.filter((id) => id !== ownerId) : [...prev, ownerId]
+      prev.includes(ownerId) ? prev.filter((id) => id !== ownerId) : [...prev, ownerId]
     );
   };
 
+// useEffect(() => {
+//     console.log("Updated Owners with Pets:", owners);
+// }, [owners]);
 
-  const selectPet = (pet) => {
-    console.log("Select Pet:", pet);
+  const selectPet = async (pet) => {
     setSelectedPet(pet);
-    fetchAppointments(pet.id);
+    // fetchAppointments(pet.id);
+    const token = localStorage.getItem('token');
+
+    try {
+      const response = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL}/appointments/last-visit`,
+          {
+              headers: { Authorization: `Bearer ${token}` },
+              params: {
+                petId: pet.id,
+                vetName: userName
+              },
+          }
+      );
+
+      setLastVisitData(null); // Clear the data for the previously selected pet
+      console.log("last appointment info:", response.data);
+      setLastVisitData(response.data);
+    } catch (error) {
+        console.error('Error fetching last visit data:', error);
+        setLastVisitData(null);
+    }
   };
 
+  const filteredOwners = owners.filter((owner) =>
+    owner.owner_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div>
@@ -124,7 +158,7 @@ const VetPortal = () => {
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {owners.map((owner) => (
+          {filteredOwners.map((owner) => (
             <div key={owner.owner_id}>
               <button
                 onClick={() => toggleOwner(owner.owner_id)}
@@ -140,17 +174,20 @@ const VetPortal = () => {
               {expandedOwners.includes(owner.owner_id) && (
                 <div className="pl-8">
                   {owner.pets?.length > 0 ? (
-                    owner.pets.map((pet) => (
-                      <button
-                        key={pet.chipId}
-                        onClick={() => selectPet(pet)}
-                        className={`w-full px-4 py-2 text-left hover:bg-orange-600 hover:text-white ${
-                          selectedPet?.chipId === pet.chipId ? 'bg-orange-900' : 'N/A'
-                        } text-orange-300`}
-                      >
-                        {pet.name}
-                      </button>
-                    ))
+                    owner.pets.map((pet) => {
+                      // console.log("Rendering Pet:", pet);
+                      return (
+                        <button
+                          key={pet.pet_id}
+                          onClick={() => selectPet(pet)}
+                          className={`w-full px-4 py-2 text-left hover:bg-orange-600 hover:text-white ${
+                            selectedPet?.pet_id === pet.pet_id ? 'bg-orange-900' : ''
+                          } text-orange-300`}
+                        >
+                          {pet.pet_name}
+                        </button>
+                      );
+                    })
                   ) : (
                     <p className="text-gray-500">No pets found.</p>
                   )}
@@ -236,23 +273,27 @@ const VetPortal = () => {
 
             {/* Previous Visits */}
             <div className="bg-white rounded-lg p-6 shadow-sm">
-              <h3 className="text-xl font-semibold mb-4">Last Visit: 11/4/2023</h3>
-              <div className="grid grid-cols-2 gap-6">
+              {lastVisitData ? (
                 <div>
-                  <p><strong>Reason for Visit:</strong> Annual Checkup</p>
-                  <p><strong>Reported Weight:</strong> 32 lbs</p>
-                  <p><strong>Prescribed Medications:</strong> N/A</p>
+                    <h3 className="text-xl font-semibold mb-4">
+                        Last Visit: {lastVisitData.appointment.date ? format(parseISO(lastVisitData.appointment.date), 'MM/dd/yyyy') : 'Invalid Date'}
+                    </h3>
+                    <div className="grid grid-cols-2 gap-6">
+                        <div>
+                            <p><strong>Reason for Visit:</strong> {lastVisitData.appointment.reason}</p>
+                            <p><strong>Reported Weight:</strong> {lastVisitData.weights.length > 0 ? lastVisitData.weights[0].weight + ' lbs' : 'N/A'}</p>
+                            <p><strong>Prescribed Medications:</strong> {lastVisitData.medications.length > 0 ? lastVisitData.medications.map(med => med.medicationname).join(', ') : 'N/A'}</p>
+                            <p><strong>Vaccinations:</strong> {lastVisitData.vaccinations.length > 0 ? lastVisitData.vaccinations.map(vac => vac.vaccinationname).join(', ') : 'N/A'}</p>
+                        </div>
+                        <div>
+                            <p><strong>Notes:</strong></p>
+                            <p className="text-gray-600">{lastVisitData.appointment.notes || 'No notes available.'}</p>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                  <p><strong>Notes:</strong></p>
-                  <p className="text-gray-600">
-                    Diesel looks to be in great shape, no major health issues. 
-                    Ran ringworm and heart disease screenings and both came up negative, 
-                    keep feeding him twice a day as you were to avoid weight loss as he 
-                    is in the ideal range for a dog his size.
-                  </p>
-                </div>
-              </div>
+              ) : (
+                  <p className="text-gray-500">No last visit data available.</p>
+              )}
             </div>
           </div>
         )}

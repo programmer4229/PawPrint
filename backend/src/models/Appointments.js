@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Pet = require('./Pets');
 
 const Appointment = sequelize.define('Appointment', {
     id: {
@@ -23,10 +22,12 @@ const Appointment = sequelize.define('Appointment', {
     petId: {
         type: DataTypes.UUID,
         allowNull: true,
+        field: 'petid'
     },
     careTaker: {
         type: DataTypes.JSON,
         allowNull: true,
+        field: 'caretaker'
     },
 }
 );

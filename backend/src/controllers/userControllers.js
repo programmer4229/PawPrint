@@ -47,22 +47,64 @@ async function getOwnersForVet(req, res, next) {
                 u.name AS owner_name,
                 u.email AS owner_email,
                 u.phone AS owner_phone,
-                u.address AS owner_address
-            FROM
+                u.address AS owner_address,
+                p.id AS pet_id,
+                p.name AS pet_name,
+                p.breed AS pet_breed,
+                p.dateOfBirth AS pet_dob
+            FROM                        
                 Users u
-            JOIN
+            JOIN                   
                 Pets p ON u.id = p.ownerId
-            JOIN
+            JOIN                          
                 Appointments a ON p.id = a.petId
-            WHERE
-                u.type = 'Owner'
+            WHERE                               
+                u.type = 'Owner'                            
                 AND a.careTaker->>'name' = (
                     SELECT CONCAT(name) FROM Users WHERE id = :vetId
                 );
             `,
-            { replacements: { vetId }, type: sequelize.QueryTypes.SELECT }
+            {
+                replacements: { vetId },
+                type: sequelize.QueryTypes.SELECT
+            }
         );
-        res.json(owners);
+
+        const groupedOwners = owners.reduce((acc, row) => {
+            const ownerId = row.owner_id;
+            if (!acc[ownerId]) {
+                acc[ownerId] = {
+                    owner_id: row.owner_id,
+                    owner_name: row.owner_name,
+                    owner_email: row.owner_email,
+                    owner_phone: row.owner_phone,
+                    owner_address: row.owner_address,
+                    pets: [],
+                };
+            }
+            acc[ownerId].pets.push({
+                pet_id: row.pet_id,
+                pet_name: row.pet_name,
+                pet_breed: row.pet_breed,
+                pet_dob: row.pet_dob,
+            });
+            return acc;
+        }, {});
+
+        // debug output to log a simplified version of owners and their pets
+        console.log(
+            "Owner and Pets Mapping:",
+            Object.values(groupedOwners).map((owner) => ({
+              ...owner,
+              pets: owner.pets.map((pet) => ({
+                pet_id: pet.pet_id,
+                pet_name: pet.pet_name,
+                pet_breed: pet.pet_breed,
+              })),
+            }))
+        );
+
+        res.json(Object.values(groupedOwners));
     } catch (err) {
         console.error('Error fetching owners:', err);
         res.status(500).json({ message: 'Internal server error' });
