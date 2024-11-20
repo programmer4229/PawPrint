@@ -191,4 +191,67 @@ async function updateVisitData(req, res) {
     }
 }
 
-module.exports = { createAppointment, getAppointments, updateAppointment, deleteAppointment, getLastVisitData, updateVisitData };
+async function getPreviousAppointments(req, res) {
+    const { petId, vetName } = req.query;
+
+    try {
+        // Fetch the last visit
+        const lastAppointment = await Appointment.findOne({
+            where: {
+                petId,
+                [Sequelize.Op.and]: Sequelize.literal(
+                    `(caretaker::jsonb @> :vetNameCondition)`
+                ),
+            },
+            replacements: {
+                vetNameCondition: JSON.stringify({ name: vetName }),
+            },
+            attributes: ['date'], // Only need the date of the last visit
+            order: [['date', 'DESC']],
+        });
+
+        // If no last appointment found, fetch all previous visits
+        const excludeDate = lastAppointment ? lastAppointment.date : null;
+
+        // Fetch previous appointments (excluding the last visit)
+        const appointments = await Appointment.findAll({
+            where: {
+                petId,
+                [Sequelize.Op.and]: Sequelize.literal(
+                    `(caretaker::jsonb @> :vetNameCondition)`
+                ),
+                ...(excludeDate && { date: { [Sequelize.Op.lt]: excludeDate } }), // Exclude last visit's date
+            },
+            replacements: {
+                vetNameCondition: JSON.stringify({ name: vetName }),
+            },
+            attributes: ['id', 'date', 'time', 'reason', 'petId', 'careTaker', 'notes'],
+            order: [['date', 'DESC']],
+        });
+
+        // Fetch additional details for each appointment
+        const appointmentsWithDetails = await Promise.all(
+            appointments.map(async (appointment) => {
+                const { id, date } = appointment;
+
+                const weights = await PetWeight.findAll({ where: { petId, date } });
+                const vaccinations = await Vaccination.findAll({ where: { petId, vaccinationdate: date } });
+                const medications = await Medication.findAll({ where: { petId, medicationdate: date } });
+
+                return {
+                    ...appointment.toJSON(),
+                    weights,
+                    vaccinations,
+                    medications,
+                };
+            })
+        );
+
+        res.status(200).json(appointmentsWithDetails);
+    } catch (error) {
+        console.error('Error fetching previous appointments:', error);
+        res.status(500).json({ message: 'Failed to fetch previous appointments', error });
+    }
+}
+
+module.exports = { createAppointment, getAppointments, updateAppointment, deleteAppointment, getLastVisitData, updateVisitData, getPreviousAppointments };
