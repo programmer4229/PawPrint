@@ -73,6 +73,10 @@ const VetPortal = () => {
   const [visitVaccinations, setVisitVaccinations] = useState([]);
   const [visitNotes, setVisitNotes] = useState('');
 
+  // for active tab
+  const [activeTab, setActiveTab] = useState('lastVisit');
+  const handleTabSwitch = (tab) => setActiveTab(tab);
+
   useEffect(() => {
       const fetchOwners = async () => {
         try {
@@ -92,16 +96,21 @@ const VetPortal = () => {
       fetchOwners();
   }, [token]);
 
-  const fetchAppointments = async (petId) => {
+  const fetchPrevAppointments = async (petId) => {
     const token = localStorage.getItem('token');
-    // console.log("Token for 'toggleOwner'", token);
     try {
-        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/appointments/get?petId=${petId}`, {
+        const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/appointments/previous-visits`, {
             headers: { Authorization: `Bearer ${token}` },
+            params: {
+                petId: petId,
+                vetName: userName,
+            },
         });
+
+        console.log('Fetched previous appointments with details:', response.data);
         setAppointments(response.data);
     } catch (error) {
-        console.error('Error fetching appointments:', error);
+        console.error('Error fetching previous appointments:', error);
     }
   };
 
@@ -148,7 +157,7 @@ const VetPortal = () => {
     console.log("Selected Pet:", pet);
     setSelectedPet(null);
     setSelectedPet(pet);
-    // fetchAppointments(pet.id);
+
     const token = localStorage.getItem('token');
 
     try {
@@ -164,8 +173,11 @@ const VetPortal = () => {
       );
 
       setLastVisitData(null); // Clear the data for the previously selected pet
-      console.log("last appointment info:", response.data);
+      // console.log("last appointment info:", response.data);
       setLastVisitData(response.data);
+
+      // Fetch all previous appointments
+      await fetchPrevAppointments(pet.pet_id);
     } catch (error) {
         console.error('Error fetching last visit data:', error);
         setLastVisitData(null);
@@ -372,29 +384,76 @@ const VetPortal = () => {
               </div>
             </div>
 
-            {/* Previous Visits */}
             <div className="bg-white rounded-lg p-6 shadow-sm">
-              {lastVisitData ? (
-                <div>
-                    <h3 className="text-xl font-semibold mb-4">
-                        Last Visit: {lastVisitData.appointment.date ? format(parseISO(lastVisitData.appointment.date), 'MM/dd/yyyy') : 'Invalid Date'}
-                    </h3>
-                    <div className="grid grid-cols-2 gap-6">
-                        <div>
-                            <p><strong>Reason for Visit:</strong> {lastVisitData.appointment.reason}</p>
-                            <p><strong>Reported Weight:</strong> {lastVisitData.weights.length > 0 ? lastVisitData.weights[0].weight + ' lbs' : 'N/A'}</p>
-                            <p><strong>Prescribed Medications:</strong> {lastVisitData.medications.length > 0 ? lastVisitData.medications.map(med => med.medicationName).join(', ') : 'N/A'}</p>
-                            <p><strong>Vaccinations:</strong> {lastVisitData.vaccinations.length > 0 ? lastVisitData.vaccinations.map(vac => vac.vaccinationName).join(', ') : 'N/A'}</p>
-                        </div>
-                        <div>
-                            <p><strong>Notes:</strong></p>
-                            <p className="text-gray-600">{lastVisitData.appointment.notes || 'No notes available.'}</p>
-                        </div>
-                    </div>
+              {/* Tab Navigation */}
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex justify-start space-x-4 border-b border-gray-200">
+                  <button
+                    className={`py-2 px-4 font-semibold ${
+                      activeTab === 'lastVisit' ? 'text-orange-600 border-b-2 border-orange-600' : 'text-gray-600'
+                    }`}
+                    onClick={() => handleTabSwitch('lastVisit')}
+                  >
+                    Last Visit
+                  </button>
+                  <button
+                    className={`py-2 px-4 font-semibold ${
+                      activeTab === 'previousVisits' ? 'text-orange-600 border-b-2 border-orange-600' : 'text-gray-600'
+                    }`}
+                    onClick={() => handleTabSwitch('previousVisits')}
+                  >
+                    Previous Visits
+                  </button>
                 </div>
-              ) : (
-                  <p className="text-gray-500">No last visit data available.</p>
+              </div>
+
+              {/* Tab Content */}
+              {activeTab === 'lastVisit' && (
+                <div className="bg-white rounded-lg p-6 shadow-sm">
+                  {lastVisitData ? (
+                    <div>
+                      <h3 className="text-xl font-semibold mb-4">
+                        Last Visit: {lastVisitData.appointment.date ? format(parseISO(lastVisitData.appointment.date), 'MM/dd/yyyy') : 'Invalid Date'}
+                      </h3>
+                      <div className="grid grid-cols-2 gap-6">
+                        <div>
+                          <p><strong>Reason for Visit:</strong> {lastVisitData.appointment.reason}</p>
+                          <p><strong>Reported Weight:</strong> {lastVisitData.weights.length > 0 ? lastVisitData.weights[0].weight + ' lbs' : 'N/A'}</p>
+                          <p><strong>Prescribed Medications:</strong> {lastVisitData.medications.length > 0 ? lastVisitData.medications.map(med => med.medicationName).join(', ') : 'N/A'}</p>
+                          <p><strong>Vaccinations:</strong> {lastVisitData.vaccinations.length > 0 ? lastVisitData.vaccinations.map(vac => vac.vaccinationName).join(', ') : 'N/A'}</p>
+                        </div>
+                        <div>
+                          <p><strong>Notes:</strong></p>
+                          <p className="text-gray-600">{lastVisitData.appointment.notes || 'No notes available.'}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-500">No last visit data available.</p>
+                  )}
+                </div>
               )}
+
+{activeTab === 'previousVisits' && (
+    <div className="bg-white rounded-lg p-6 shadow-sm max-h-96 overflow-y-scroll">
+        <h3 className="text-xl font-semibold mb-4">Previous Visits</h3>
+        {appointments.length > 0 ? (
+            appointments.map((appointment) => (
+                <div key={appointment.id} className="mb-4 p-4 bg-gray-50 rounded shadow-sm">
+                    <p><strong>Date:</strong> {appointment.date}</p>
+                    <p><strong>Time:</strong> {appointment.time}</p>
+                    <p><strong>Reason:</strong> {appointment.reason}</p>
+                    <p><strong>Weight:</strong> {appointment.weights.length > 0 ? `${appointment.weights[0].weight} lbs` : 'N/A'}</p>
+                    <p><strong>Medications:</strong> {appointment.medications.length > 0 ? appointment.medications.map(med => med.medicationName).join(', ') : 'N/A'}</p>
+                    <p><strong>Vaccinations:</strong> {appointment.vaccinations.length > 0 ? appointment.vaccinations.map(vac => vac.vaccinationName).join(', ') : 'N/A'}</p>
+                    <p><strong>Notes:</strong> {appointment.notes || 'No notes available.'}</p>
+                </div>
+            ))
+        ) : (
+            <p className="text-gray-500">No previous visits found.</p>
+        )}
+    </div>
+)}
             </div>
           </div>
         )}
