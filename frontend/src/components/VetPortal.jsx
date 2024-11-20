@@ -46,6 +46,13 @@ const VetPortal = () => {
   const [lastVisitData, setLastVisitData] = useState(null);
   const [searchTerm, setSearchTerm] = useState('')
 
+  // for 'todays visit'
+  const [visitReason, setVisitReason] = useState('');
+  const [visitWeight, setVisitWeight] = useState('');
+  const [visitMedications, setVisitMedications] = useState([]);
+  const [visitVaccinations, setVisitVaccinations] = useState([]);
+  const [visitNotes, setVisitNotes] = useState('');
+
   useEffect(() => {
       const fetchOwners = async () => {
         try {
@@ -106,7 +113,14 @@ const VetPortal = () => {
   };
 
   const selectPet = async (pet) => {
-    console.log("Selected Pet:", pet);
+    // clear any input fields
+    setVisitReason('');
+    setVisitWeight('');
+    setVisitMedications([]);
+    setVisitVaccinations([]);
+    setVisitNotes('');
+
+    // console.log("Selected Pet:", pet);
     setSelectedPet(null);
     setSelectedPet(pet);
     // fetchAppointments(pet.id);
@@ -130,6 +144,41 @@ const VetPortal = () => {
     } catch (error) {
         console.error('Error fetching last visit data:', error);
         setLastVisitData(null);
+    }
+  };
+
+  const handleSubmitVisitData = async (e) => {
+    e.preventDefault();
+
+    const visitData = {
+        vetName: userName,
+        petId: selectedPet.pet_id,
+        reason: visitReason,
+        date: new Date().toISOString().split('T')[0],
+        weight: visitWeight || null,
+        vaccinations: visitVaccinations || [],
+        medications: visitMedications || [],
+        notes: visitNotes || null,
+    };
+
+    try {
+        const token = localStorage.getItem('token');
+        const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/appointments/update`, visitData, {
+            headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (response.status === 200) {
+          console.log('Visit data updated successfully');
+          // Clear form fields after successful submission
+          setVisitReason('');
+          setVisitWeight('');
+          setVisitMedications([]);
+          setVisitVaccinations([]);
+          setVisitNotes('');
+        }
+    } catch (error) {
+        console.error('Error updating visit data:', error);
+        // alert('Failed to update visit data');
     }
   };
 
@@ -247,24 +296,55 @@ const VetPortal = () => {
               {/* Today's Visit */}
               <div className="bg-white rounded-lg p-6 shadow-sm">
                 <h3 className="text-xl font-semibold mb-4">Today's Visit: {new Date().toLocaleDateString()}</h3>
-                <form className="space-y-4">
+                <form className="space-y-4" onSubmit={handleSubmitVisitData}>
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Reason for visit</label>
-                    <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50" />
+                    <input
+                        type="text"
+                        value={visitReason}
+                        onChange={(e) => setVisitReason(e.target.value)}
+                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50"
+                    />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Update weight</label>
-                    <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50" />
+                      <label className="block text-sm font-medium text-gray-700">Update weight</label>
+                      <input
+                          type="text"
+                          value={visitWeight}
+                          onChange={(e) => setVisitWeight(e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50"
+                      />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Medications</label>
-                    <input type="text" className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50" />
+                      <label className="block text-sm font-medium text-gray-700">Medications</label>
+                      <input
+                          type="text"
+                          value={visitMedications}
+                          onChange={(e) => setVisitMedications(e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50"
+                      />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Notes</label>
-                    <textarea rows={4} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50"></textarea>
+                      <label className="block text-sm font-medium text-gray-700">Vaccinations</label>
+                      <input
+                          type="text"
+                          value={visitVaccinations}
+                          onChange={(e) => setVisitVaccinations(e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50"
+                      />
                   </div>
-                  <button type="submit" className="w-full bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600">Submit</button>
+                  <div>
+                      <label className="block text-sm font-medium text-gray-700">Notes</label>
+                      <textarea
+                          rows={4}
+                          value={visitNotes}
+                          onChange={(e) => setVisitNotes(e.target.value)}
+                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50"
+                      ></textarea>
+                  </div>
+                  <button type="submit" className="w-full bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600">
+                      Submit
+                  </button>
                 </form>
               </div>
             </div>

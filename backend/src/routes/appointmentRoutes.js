@@ -8,5 +8,6 @@ router.get('/get', apptControllers.getAppointments);
 router.get('/last-visit', authMiddleware, apptControllers.getLastVisitData);
 router.patch('/profile/:id', apptControllers.updateAppointment);
 router.delete('/profile', apptControllers.deleteAppointment);
+router.post('/update', apptControllers.updateVisitData);
 
 module.exports = router;
