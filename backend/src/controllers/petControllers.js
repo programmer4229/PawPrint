@@ -3,6 +3,7 @@ const User = require('../models/Users');
 const { AdoptionInfo, Vaccination, Medication } = require('../models/MedicalHistory');
 const SharedPets = require('../models/SharedPets');
 const PetWeight = require('../models/PetWeight');
+const sequelize = require('../config/database');
 
 
 async function createPet(req, res, next) {
@@ -59,14 +60,45 @@ async function getPets(req, res, next) {
 
 
 async function updatePet(req, res, next) {
+    // console.log("req:", req);
+    // console.log("res:", res);
+    const { id, name, type, breed, dateOfBirth, careInstructions } = req.body; // Ensure 'id' is included in the request body
+    console.log("name:", name);
+    console.log("type:", type);
+    console.log("breed:", breed);
+    console.log("dateOfBirth:", dateOfBirth);
+    console.log("careInstructions:", careInstructions);
+    
     try {
-        const pet = await Pet.findByPk(req.params.id);
-        if (pet) {
-            await pet.update(req.body);
-            res.json({ message: 'Pet updated' });
+        // Start a transaction
+        const transaction = await sequelize.transaction();
+
+        // Update the pet record
+        const [affectedRows] = await Pet.update(
+            {
+                name,
+                type,
+                breed,
+                dateOfBirth,
+                careInstructions,
+            },
+            {
+                where: { id }, // Specify which pet to update
+                transaction,
+            }
+        );
+
+        if (affectedRows === 0) {
+            await transaction.rollback();
+            return res.status(404).json({ message: "Pet not found or no changes made" });
         }
-    } catch (err) {
-        res.status(500).json({ message: err.message });
+
+        // Commit the transaction
+        await transaction.commit();
+        res.status(200).json({ message: 'Pet updated successfully' });
+    } catch (error) {
+        console.error('Error updating pet data:', error);
+        res.status(500).json({ message: 'Failed to update pet data', error });
     }
 };
 

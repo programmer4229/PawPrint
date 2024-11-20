@@ -63,6 +63,14 @@ const PetProfile = () => {
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  //for editing pet
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState(null);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setPetData({ ...petData, [name]: value });
+  };
 
   // Fetch pet data by ID
   const fetchPetData = async () => {
@@ -200,6 +208,38 @@ const PetProfile = () => {
     setShowDeleteModal(false);
   };
 
+  //edit pet
+  const handleEditPet = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    try {
+      const formData = new FormData();
+      Object.keys(editFormData).forEach((key) => {
+        formData.append(key, editFormData[key]);
+      });
+  
+      formData.append('id', editFormData.id);
+  
+      await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/pets/update`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+  
+      // Refetch pet data to ensure it is up-to-date
+      await fetchPetData();
+  
+      handleCloseEditModal(); // Close the modal
+    } catch (error) {
+      console.error('Error editing pet:', error);
+    }
+  };
+
   // Handle file selection
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -290,6 +330,20 @@ const PetProfile = () => {
     setShareEmail(''); // Clear the email input
   };
 
+  const handleOpenEditModal = () => {
+    setEditFormData({ ...petData }); // Populate the modal form with current pet data
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData({ ...editFormData, [name]: value }); // Update modal form values
+  };
+
   // Function to update pet services
   const updateServices = (updatedServices) => {
     setPetData((prevPet) => ({
@@ -349,6 +403,95 @@ const PetProfile = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Edit Button (Visible only to owner) */}
+      {isOwner && (
+        <button
+          onClick={handleOpenEditModal}
+          className="bg-blue-500 text-white px-4 py-2 rounded-full mt-4 hover:bg-blue-600 transition-colors"
+        >
+          Edit Pet Profile
+        </button>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-96">
+              <h2 className="text-xl font-bold mb-4">Add a New Pet</h2>
+              <form onSubmit={handleEditPet}>
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={editFormData?.name || ''}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border rounded"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Type</label>
+                  <input
+                    type="text"
+                    name="type"
+                    value={editFormData?.type || ''}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border rounded"
+                    placeholder="e.g., dog or cat"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Breed</label>
+                  <input
+                    type="text"
+                    name="breed"
+                    value={editFormData?.breed || ''}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Date of Birth</label>
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={editFormData?.dateOfBirth || ''}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Care Instructions</label>
+                  <textarea
+                    name="careInstructions"
+                    value={editFormData?.careInstructions || ''}
+                    onChange={handleEditInputChange}
+                    className="w-full px-3 py-2 border rounded"
+                    placeholder="Provide any special care instructions"
+                  ></textarea>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleCloseEditModal}
+                    className="bg-red-500 text-white px-4 py-2 rounded mr-2"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
         </div>
       )}
 
