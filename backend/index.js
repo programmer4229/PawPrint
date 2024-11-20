@@ -50,7 +50,10 @@ app.use('/api/pets', (req, res, next) => {
     next();
 }, petRoutes);
 
-app.use('/api/appointments', appointmentRoutes);
+app.use('/api/appointments', (req, res, next) => {
+    console.log("Appointment route accessed with path:", req.path);
+    next();
+}, appointmentRoutes);
 
 
 sequelize.sync({ force: false }).then(() => {

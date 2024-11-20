@@ -3,9 +3,9 @@ const Appointment = require('../models/Appointments');
 async function createAppointment(req, res, next) {
     try {
         const appointment = await Appointment.create(req.body);
-        res.json(appointment);
+        res.json("Appointment Created");
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json( 'Failed to create' );
     }
 };
 

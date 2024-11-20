@@ -1,16 +1,38 @@
 import React, { useState } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-const ServicesTab = ({ pet, updateServices }) => {
+import axios from 'axios';
+
+const ServicesTab = ({ pet = { id: '' } }) => {
   const [date, setDate] = useState('');
-  const [service, setService] = useState('');
+  const [reason, setService] = useState('');
   const [frequency, setFrequency] = useState('');
-  const handleReminder = (e) => {
+  const [time, setTime] = useState('');
+ 
+
+  
+  let data;
+  const createAppointment = async (e) => {
     e.preventDefault();
+    console.log('Creating appointment');
+    try {
+      const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/appointments/create/`, {
+        petId: pet.id,
+        date,
+        reason,
+        frequency,
+        time,
+      }, {
+        headers: { 'Content-Type': 'application/json' }
+      });
+      console.log(response.data);
+    }
+    catch (error) {
+      console.log('Failed to create appointment:', error);
+    }
   };
   return (
     <div>
       <div className='right-side-div' style={{display:"flex", justifyContent:"flex-end"}}>
-        <form className="mt-4 mb-6 flex space-x-2" onSubmit={handleReminder}>
+        <form className="mt-4 mb-6 flex space-x-2" onSubmit={createAppointment}>
           <input
             type="date"
             placeholder='07/10/23'
@@ -19,10 +41,16 @@ const ServicesTab = ({ pet, updateServices }) => {
             className='px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2'
             required
           />
+          <input
+            type="time"
+            placeholder='10:00 AM'
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            className='px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2'
+            required
+          />
           <select
-            type="service"
-            placeholder='Select Service'
-            value={service}
+            value={reason}
             onChange={(e) => setService(e.target.value)}
             className='px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2'
             required
@@ -33,29 +61,28 @@ const ServicesTab = ({ pet, updateServices }) => {
             <option value="train">Training</option>
           </select>
           <select
-            type="frequency"
-            placeholder='Select Frequency'
             value={frequency}
             onChange={(e) => setFrequency(e.target.value)}
             className='px-4 py-2 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2'
           >
-            <option value="">Select Frequency</option>
-            <option value="once">One Time</option>
             <option value="week">Weekly</option>
             <option value="biMonth">Bi-Monthly</option>
             <option value="month">Monthly</option>
             <option value="year">Yearly</option>
           </select>
-          <button className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
+          <button className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
+            type="submit"
+          >
             + Add Reminder
           </button>
         </form>
       </div>
-      <h3 className="text-lg font-semibold mb-2">Upcoming Appointment</h3>
+      <h3 className="text-lg font-semibold mb-2">Upcoming Appointments</h3>
       <div className="mt-4 flex justify-center space-x-2 mb-6">
         <div style={{width:"500px"}}
         className="text-lg px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500">
-          <span>07/18/24 - Grooming</span>
+          {/* input the date and service from the response data */}
+
         </div>
         <button className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2">
           X
