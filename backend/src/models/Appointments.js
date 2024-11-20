@@ -29,6 +29,10 @@ const Appointment = sequelize.define('Appointment', {
         allowNull: true,
         field: 'caretaker'
     },
+    notes: {
+        type: DataTypes.STRING(1234),
+        allowNull: true,
+    }
 }, {
     tableName: 'appointments',
     timestamps: false
