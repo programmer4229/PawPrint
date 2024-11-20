@@ -50,8 +50,10 @@ async function getOwnersForVet(req, res, next) {
                 u.address AS owner_address,
                 p.id AS pet_id,
                 p.name AS pet_name,
+                p.type AS pet_type,
                 p.breed AS pet_breed,
-                p.dateOfBirth AS pet_dob
+                p.dateOfBirth AS pet_dob,
+                p.image AS pet_image
             FROM                        
                 Users u
             JOIN                   
@@ -82,27 +84,36 @@ async function getOwnersForVet(req, res, next) {
                     pets: [],
                 };
             }
+
+            // Convert image to base64 if it exists
+            const petImage = row.pet_image
+                ? `data:image/png;base64,${Buffer.from(row.pet_image, 'binary').toString('base64')}`
+                : null;
+
+            // console.log("Pets:", acc[ownerId].pets);
             acc[ownerId].pets.push({
                 pet_id: row.pet_id,
                 pet_name: row.pet_name,
+                pet_type: row.pet_type,
                 pet_breed: row.pet_breed,
                 pet_dob: row.pet_dob,
+                pet_image: petImage,
             });
             return acc;
         }, {});
 
         // debug output to log a simplified version of owners and their pets
-        console.log(
-            "Owner and Pets Mapping:",
-            Object.values(groupedOwners).map((owner) => ({
-              ...owner,
-              pets: owner.pets.map((pet) => ({
-                pet_id: pet.pet_id,
-                pet_name: pet.pet_name,
-                pet_breed: pet.pet_breed,
-              })),
-            }))
-        );
+        // console.log(
+        //     "Owner and Pets Mapping:",
+        //     Object.values(groupedOwners).map((owner) => ({
+        //       ...owner,
+        //       pets: owner.pets.map((pet) => ({
+        //         pet_id: pet.pet_id,
+        //         pet_name: pet.pet_name,
+        //         pet_breed: pet.pet_breed,
+        //       })),
+        //     }))
+        // );
 
         res.json(Object.values(groupedOwners));
     } catch (err) {
