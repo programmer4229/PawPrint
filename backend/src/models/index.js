@@ -35,6 +35,7 @@ User.belongsToMany(Pet, { through: SharedPets, foreignKey: 'userId', as: 'shared
 Pet.belongsToMany(User, { through: SharedPets, foreignKey: 'petId', as: 'sharedWithUsers' });
 
 
+
 module.exports = {
     User,
     Pet,

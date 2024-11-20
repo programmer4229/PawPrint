@@ -17,12 +17,12 @@ const Appointment = sequelize.define('Appointment', {
         allowNull: false,
     },
     reason: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(1000),
         allowNull: false,
     },
     petId: {
         type: DataTypes.UUID,
-        allowNull: false,
+        allowNull: true,
     },
     careTaker: {
         type: DataTypes.JSON,
@@ -30,6 +30,8 @@ const Appointment = sequelize.define('Appointment', {
     },
 }
 );
+
+
 
 
 

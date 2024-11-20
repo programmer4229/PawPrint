@@ -1,9 +1,10 @@
 const Appointment = require('../models/Appointments');
+const Pets = require('../models/Pets');
 
 async function createAppointment(req, res, next) {
     try {
         const appointment = await Appointment.create(req.body);
-        res.json("Appointment Created");
+        res.json(appointment);
     } catch (err) {
         res.status(500).json( 'Failed to create' );
     }
@@ -11,10 +12,11 @@ async function createAppointment(req, res, next) {
 
 async function getAppointments(req, res, next) {
     try {
-        const appointments = await Appointment.findAll({ where: { petId: req.query.petId } });
+        //return all appointments
+        const appointments = await Appointment.findAll();
         res.json(appointments);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(500).json("No appointments found for pet" + req.body.petId);
     }
 };
 
@@ -32,7 +34,7 @@ async function updateAppointment(req, res, next) {
 
 async function deleteAppointment(req, res, next) {
     try {
-        const appointment = await Appointment.findByPk(req.params.id);
+        const appointment = await Appointment.findByPk(req.body.id);
         if (appointment) {
             await appointment.destroy();
             res.json({ message: 'Appointment deleted' });
