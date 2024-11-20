@@ -4,6 +4,8 @@ import axios from 'axios';
 import Navbar from './Navbar';
 import { parseISO, format } from 'date-fns';
 import dogPic from "./dogProfilePic.jpg";
+import catPic from './catProfilePic.jpeg';
+
 
 const ChevronDown = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -34,6 +36,24 @@ const UploadIcon = () => (
     <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
   </svg>
 )
+
+// Helper function to calculate age
+const calculateAge = (birthDate) => {
+  if (!birthDate) return 'N/A'; // Handle missing birth date
+  const birth = new Date(birthDate);
+  const now = new Date();
+  
+  let years = now.getFullYear() - birth.getFullYear();
+  let months = now.getMonth() - birth.getMonth();
+
+  // Adjust for cases where the month difference is negative
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+
+  return `${years} years, ${months} months`;
+};
 
 const VetPortal = () => {
   const auth = useContext(AuthContext);
@@ -112,15 +132,20 @@ const VetPortal = () => {
     );
   };
 
+    // Clear input fields after successful form submission or pet selection
+    const clearVisitFields = () => {
+      setVisitReason('');
+      setVisitWeight('');
+      setVisitMedications([]);
+      setVisitVaccinations([]);
+      setVisitNotes('');
+  };
+
   const selectPet = async (pet) => {
     // clear any input fields
-    setVisitReason('');
-    setVisitWeight('');
-    setVisitMedications([]);
-    setVisitVaccinations([]);
-    setVisitNotes('');
+    clearVisitFields();
 
-    // console.log("Selected Pet:", pet);
+    console.log("Selected Pet:", pet);
     setSelectedPet(null);
     setSelectedPet(pet);
     // fetchAppointments(pet.id);
@@ -167,15 +192,9 @@ const VetPortal = () => {
             headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (response.status === 200) {
-          console.log('Visit data updated successfully');
-          // Clear form fields after successful submission
-          setVisitReason('');
-          setVisitWeight('');
-          setVisitMedications([]);
-          setVisitVaccinations([]);
-          setVisitNotes('');
-        }
+        console.log('Visit data updated successfully');
+        // Clear form fields after successful submission
+        clearVisitFields();
     } catch (error) {
         console.error('Error updating visit data:', error);
         // alert('Failed to update visit data');
@@ -253,14 +272,18 @@ const VetPortal = () => {
             <div className="bg-white rounded-lg p-6 flex items-center justify-between shadow-sm">
               <div className="flex items-center gap-4">
                 <img
-                  src={selectedPet.image}
-                  alt={selectedPet.name}
-                  className="w-16 h-16 rounded-full"
+                  src={selectedPet.pet_image || (selectedPet.pet_type.toLowerCase() === 'dog' ? dogPic : catPic)}
+                  alt={selectedPet?.pet_name || 'Pet Profile'}
+                  className="w-16 h-16 rounded-full object-cover"
                 />
                 <div>
-                  <h2 className="text-2xl font-bold">{selectedPet.name}</h2>
+                  <h2 className="text-2xl font-bold">{selectedPet.pet_name}</h2>
                   <p className="text-gray-600">
-                    Chip ID: {selectedPet.chipId} | Age: {selectedPet.age} | Breed: {selectedPet.breed}
+                    Chip ID: {selectedPet?.chipId || 'N/A'} | 
+                    Type: {(selectedPet?.pet_type).toUpperCase() || 'Unknown'} |
+                    Breed: {selectedPet?.pet_breed || 'Unknown'} | 
+                    Age: {calculateAge(selectedPet?.pet_dob) || 'Unknown'} | 
+                    DOB: {selectedPet?.pet_dob ? new Date(selectedPet.pet_dob).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : 'Unknown'}
                   </p>
                 </div>
               </div>
