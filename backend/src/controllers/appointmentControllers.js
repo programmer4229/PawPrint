@@ -157,8 +157,10 @@ async function updateVisitData(req, res) {
                     Vaccination.create(
                         {
                             petId,
-                            vaccinationName: vaccine,
+                            vaccinationName: vaccine.name,
                             vaccinationDate: date,
+                            vetName,
+                            dueDate: vaccine.dueDate || null,
                         },
                         { transaction }
                     )
@@ -173,8 +175,13 @@ async function updateVisitData(req, res) {
                     Medication.create(
                         {
                             petId,
-                            medicationName: medication,
+                            medicationName: medication.name,
                             medicationDate: date,
+                            vetName,
+                            dosage: medication.dosage || null,
+                            frequency: medication.frequency || null,
+                            notes: medication.notes || null,
+                            dueDate: medication.dueDate || null,
                         },
                         { transaction }
                     )

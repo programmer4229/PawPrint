@@ -69,8 +69,13 @@ const VetPortal = () => {
   // for 'todays visit'
   const [visitReason, setVisitReason] = useState('');
   const [visitWeight, setVisitWeight] = useState('');
-  const [visitMedications, setVisitMedications] = useState([]);
-  const [visitVaccinations, setVisitVaccinations] = useState([]);
+  const [visitMedications, setVisitMedications] = useState([
+    { name: '', dosage: '', frequency: '', notes: '', dueDate: '' },
+  ]);
+  const [visitVaccinations, setVisitVaccinations] = useState([
+      { name: '', dueDate: '' },
+  ]);
+
   const [visitNotes, setVisitNotes] = useState('');
 
   // for active tab
@@ -107,7 +112,7 @@ const VetPortal = () => {
             },
         });
 
-        console.log('Fetched previous appointments with details:', response.data);
+        // console.log('Fetched previous appointments with details:', response.data);
         setAppointments(response.data);
     } catch (error) {
         console.error('Error fetching previous appointments:', error);
@@ -154,7 +159,7 @@ const VetPortal = () => {
     // clear any input fields
     clearVisitFields();
 
-    console.log("Selected Pet:", pet);
+    // console.log("Selected Pet:", pet);
     setSelectedPet(null);
     setSelectedPet(pet);
 
@@ -184,6 +189,36 @@ const VetPortal = () => {
     }
   };
 
+  // Update Medications
+  const handleMedicationChange = (index, field, value) => {
+    setVisitMedications((prev) =>
+        prev.map((med, i) => (i === index ? { ...med, [field]: value } : med))
+    );
+  };
+
+  // Update Vaccinations
+  const handleVaccinationChange = (index, field, value) => {
+    setVisitVaccinations((prev) =>
+        prev.map((vac, i) => (i === index ? { ...vac, [field]: value } : vac))
+    );
+  };
+
+  const addMedication = () => {
+    setVisitMedications((prev) => [...prev, { name: '', dosage: '', frequency: '', notes: '', dueDate: '' }]);
+  };
+
+  const addVaccination = () => {
+    setVisitVaccinations((prev) => [...prev, { name: '', dueDate: '' }]);
+  };
+
+  const removeMedication = (index) => {
+    setVisitMedications((prevMeds) => prevMeds.filter((_, i) => i !== index));
+  };
+
+  const removeVaccination = (index) => {
+    setVisitVaccinations((prevVaccinations) => prevVaccinations.filter((_, i) => i !== index));
+  };
+
   const handleSubmitVisitData = async (e) => {
     e.preventDefault();
 
@@ -193,23 +228,35 @@ const VetPortal = () => {
         reason: visitReason,
         date: new Date().toISOString().split('T')[0],
         weight: visitWeight || null,
-        vaccinations: visitVaccinations || [],
-        medications: visitMedications || [],
+        vaccinations: visitVaccinations.map((vac) => ({
+            name: vac.name,
+            dueDate: vac.dueDate || null,
+        })),
+        medications: visitMedications.map((med) => ({
+            name: med.name,
+            dosage: med.dosage || null,
+            frequency: med.frequency || null,
+            notes: med.notes || null,
+            dueDate: med.dueDate || null,
+        })),
         notes: visitNotes || null,
     };
 
     try {
         const token = localStorage.getItem('token');
-        const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/appointments/update`, visitData, {
-            headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axios.post(
+            `${process.env.REACT_APP_API_BASE_URL}/appointments/update`,
+            visitData,
+            {
+                headers: { Authorization: `Bearer ${token}` },
+            }
+        );
 
         console.log('Visit data updated successfully');
         // Clear form fields after successful submission
         clearVisitFields();
     } catch (error) {
         console.error('Error updating visit data:', error);
-        // alert('Failed to update visit data');
     }
   };
 
@@ -333,7 +380,7 @@ const VetPortal = () => {
                 <h3 className="text-xl font-semibold mb-4">Today's Visit: {new Date().toLocaleDateString()}</h3>
                 <form className="space-y-4" onSubmit={handleSubmitVisitData}>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Reason for visit</label>
+                    <label className="block text-medium font-semibold text-gray-700">Reason for visit</label>
                     <input
                         type="text"
                         value={visitReason}
@@ -342,7 +389,7 @@ const VetPortal = () => {
                     />
                   </div>
                   <div>
-                      <label className="block text-sm font-medium text-gray-700">Update weight</label>
+                      <label className="block text-medium font-semibold text-gray-700">Update weight</label>
                       <input
                           type="text"
                           value={visitWeight}
@@ -351,25 +398,110 @@ const VetPortal = () => {
                       />
                   </div>
                   <div>
-                      <label className="block text-sm font-medium text-gray-700">Medications</label>
-                      <input
-                          type="text"
-                          value={visitMedications}
-                          onChange={(e) => setVisitMedications(e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50"
-                      />
+                    <label className="block text-medium font-semibold text-gray-700">Medications</label>
+                      {visitMedications.map((med, index) => (
+                          <div key={index} className="space-y-2 border-b pb-4 mb-4">
+                              <input
+                                  type="text"
+                                  value={med.name}
+                                  placeholder="Medication Name"
+                                  onChange={(e) => handleMedicationChange(index, 'name', e.target.value)}
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-orange-500"
+                              />
+                              <input
+                                  type="text"
+                                  value={med.dosage}
+                                  placeholder="Dosage"
+                                  onChange={(e) => handleMedicationChange(index, 'dosage', e.target.value)}
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-orange-500"
+                              />
+                              <input
+                                  type="text"
+                                  value={med.frequency}
+                                  placeholder="Frequency"
+                                  onChange={(e) => handleMedicationChange(index, 'frequency', e.target.value)}
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-orange-500"
+                              />
+                              <textarea
+                                  value={med.notes}
+                                  placeholder="Notes"
+                                  onChange={(e) => handleMedicationChange(index, 'notes', e.target.value)}
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-orange-500"
+                              />
+                              <div className="relative">
+                                  <input
+                                      type="date"
+                                      value={med.dueDate}
+                                      onChange={(e) => handleMedicationChange(index, 'dueDate', e.target.value)}
+                                      className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-orange-500 pl-20"
+                                  />
+                                  {!med.dueDate && (
+                                      <span className="absolute top-1/2 left-0 text-gray-400 transform -translate-y-1/2 pointer-events-none">
+                                          Next Dose
+                                      </span>
+                                  )}
+                              </div>
+                              <button
+                                  type="button"
+                                  onClick={() => removeMedication(index)} // Add remove functionality
+                                  className="mt-2 bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
+                              >
+                                  Remove Medication
+                              </button>
+                          </div>
+                      ))}
+                      <button
+                          type="button"
+                          onClick={addMedication}
+                          className="mt-4 bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600"
+                      >
+                          Add Medication
+                      </button>
+                  </div>
+
+                  <div>
+                      <label className="block text-medium font-semibold text-gray-700">Vaccinations</label>
+                      {visitVaccinations.map((vac, index) => (
+                          <div key={index} className="space-y-2 border-b pb-4 mb-4">
+                              <input
+                                  type="text"
+                                  value={vac.name}
+                                  placeholder="Vaccination Name"
+                                  onChange={(e) => handleVaccinationChange(index, 'name', e.target.value)}
+                                  className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-orange-500"
+                              />
+                              <div className="relative">
+                                  <input
+                                      type="date"
+                                      value={vac.dueDate}
+                                      onChange={(e) => handleVaccinationChange(index, 'dueDate', e.target.value)}
+                                      className="block w-full rounded-md border-gray-300 shadow-sm focus:ring-orange-500 pl-20" /* Add padding to the left */
+                                  />
+                                  {!vac.dueDate && (
+                                      <span className="absolute top-1/2 left-0 text-gray-400 transform -translate-y-1/2 pointer-events-none">
+                                          Next Dose
+                                      </span>
+                                  )}
+                              </div>
+                              <button
+                                  type="button"
+                                  onClick={() => removeVaccination(index)} // Add remove functionality
+                                  className="mt-2 bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
+                              >
+                                  Remove Vaccination
+                              </button>
+                          </div>
+                      ))}
+                      <button
+                          type="button"
+                          onClick={addVaccination}
+                          className="mt-4 bg-orange-500 text-white py-2 px-4 rounded hover:bg-orange-600"
+                      >
+                          Add Vaccination
+                      </button>
                   </div>
                   <div>
-                      <label className="block text-sm font-medium text-gray-700">Vaccinations</label>
-                      <input
-                          type="text"
-                          value={visitVaccinations}
-                          onChange={(e) => setVisitVaccinations(e.target.value)}
-                          className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring focus:ring-orange-500 focus:ring-opacity-50"
-                      />
-                  </div>
-                  <div>
-                      <label className="block text-sm font-medium text-gray-700">Notes</label>
+                      <label className="block text-medium font-medium text-gray-700">Notes</label>
                       <textarea
                           rows={4}
                           value={visitNotes}
@@ -434,26 +566,26 @@ const VetPortal = () => {
                 </div>
               )}
 
-{activeTab === 'previousVisits' && (
-    <div className="bg-white rounded-lg p-6 shadow-sm max-h-96 overflow-y-scroll">
-        <h3 className="text-xl font-semibold mb-4">Previous Visits</h3>
-        {appointments.length > 0 ? (
-            appointments.map((appointment) => (
-                <div key={appointment.id} className="mb-4 p-4 bg-gray-50 rounded shadow-sm">
-                    <p><strong>Date:</strong> {appointment.date}</p>
-                    <p><strong>Time:</strong> {appointment.time}</p>
-                    <p><strong>Reason:</strong> {appointment.reason}</p>
-                    <p><strong>Weight:</strong> {appointment.weights.length > 0 ? `${appointment.weights[0].weight} lbs` : 'N/A'}</p>
-                    <p><strong>Medications:</strong> {appointment.medications.length > 0 ? appointment.medications.map(med => med.medicationName).join(', ') : 'N/A'}</p>
-                    <p><strong>Vaccinations:</strong> {appointment.vaccinations.length > 0 ? appointment.vaccinations.map(vac => vac.vaccinationName).join(', ') : 'N/A'}</p>
-                    <p><strong>Notes:</strong> {appointment.notes || 'No notes available.'}</p>
-                </div>
-            ))
-        ) : (
-            <p className="text-gray-500">No previous visits found.</p>
-        )}
-    </div>
-)}
+              {activeTab === 'previousVisits' && (
+                  <div className="bg-white rounded-lg p-6 shadow-sm max-h-96 overflow-y-scroll">
+                      <h3 className="text-xl font-semibold mb-4">Previous Visits</h3>
+                      {appointments.length > 0 ? (
+                          appointments.map((appointment) => (
+                              <div key={appointment.id} className="mb-4 p-4 bg-gray-50 rounded shadow-sm">
+                                  <p><strong>Date:</strong> {appointment.date}</p>
+                                  <p><strong>Time:</strong> {appointment.time}</p>
+                                  <p><strong>Reason:</strong> {appointment.reason}</p>
+                                  <p><strong>Weight:</strong> {appointment.weights.length > 0 ? `${appointment.weights[0].weight} lbs` : 'N/A'}</p>
+                                  <p><strong>Medications:</strong> {appointment.medications.length > 0 ? appointment.medications.map(med => med.medicationName).join(', ') : 'N/A'}</p>
+                                  <p><strong>Vaccinations:</strong> {appointment.vaccinations.length > 0 ? appointment.vaccinations.map(vac => vac.vaccinationName).join(', ') : 'N/A'}</p>
+                                  <p><strong>Notes:</strong> {appointment.notes || 'No notes available.'}</p>
+                              </div>
+                          ))
+                      ) : (
+                          <p className="text-gray-500">No previous visits found.</p>
+                      )}
+                  </div>
+              )}
             </div>
           </div>
         )}
