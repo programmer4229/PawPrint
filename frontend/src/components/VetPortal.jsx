@@ -55,7 +55,7 @@ const VetPortal = () => {
                   Authorization: `Bearer ${token}`,
               },
           });
-          console.log("Fetched Owners:", response.data);
+          // console.log("Fetched Owners:", response.data);
           setOwners(response.data);
         } catch (error) {
             console.error('Error fetching owners:', error);
@@ -67,7 +67,7 @@ const VetPortal = () => {
 
   const fetchAppointments = async (petId) => {
     const token = localStorage.getItem('token');
-    console.log("Token for 'toggleOwner'", token);
+    // console.log("Token for 'toggleOwner'", token);
     try {
         const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/appointments/get?petId=${petId}`, {
             headers: { Authorization: `Bearer ${token}` },
@@ -81,25 +81,33 @@ const VetPortal = () => {
   const toggleOwner = async (ownerId) => {
     if (!expandedOwners.includes(ownerId)) {
       const token = localStorage.getItem('token');
-      // console.log("Token for 'toggleOwner'", token);
       try {
-          const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/owner/${ownerId}`, {
-              headers: { Authorization: `Bearer ${token}` },
-          });
-          setOwners((prev) =>
-              prev.map((owner) =>
-                  owner.owner_id === ownerId ? { ...owner, pets: response.data } : owner
-              )
-          );
+        const response = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL}/users/owners`,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        // console.log("Fetched Owners with Pets:", response.data);
+  
+        setOwners((prev) =>
+          prev.map((owner) =>
+            owner.owner_id === ownerId
+              ? { ...owner, pets: response.data.find(o => o.owner_id === ownerId)?.pets || [] }
+              : owner
+          )
+        );
+        // console.log("Updated Owners with Pets:", owners);
       } catch (error) {
-          console.error('Error fetching pets:', error);
+        console.error('Error fetching pets:', error);
       }
     }
     setExpandedOwners((prev) =>
-        prev.includes(ownerId) ? prev.filter((id) => id !== ownerId) : [...prev, ownerId]
+      prev.includes(ownerId) ? prev.filter((id) => id !== ownerId) : [...prev, ownerId]
     );
   };
 
+// useEffect(() => {
+//     console.log("Updated Owners with Pets:", owners);
+// }, [owners]);
 
   const selectPet = async (pet) => {
     setSelectedPet(pet);
@@ -166,17 +174,20 @@ const VetPortal = () => {
               {expandedOwners.includes(owner.owner_id) && (
                 <div className="pl-8">
                   {owner.pets?.length > 0 ? (
-                    owner.pets.map((pet) => (
-                      <button
-                        key={pet.chipId}
-                        onClick={() => selectPet(pet)}
-                        className={`w-full px-4 py-2 text-left hover:bg-orange-600 hover:text-white ${
-                          selectedPet?.chipId === pet.chipId ? 'bg-orange-900' : 'N/A'
-                        } text-orange-300`}
-                      >
-                        {pet.name}
-                      </button>
-                    ))
+                    owner.pets.map((pet) => {
+                      // console.log("Rendering Pet:", pet);
+                      return (
+                        <button
+                          key={pet.pet_id}
+                          onClick={() => selectPet(pet)}
+                          className={`w-full px-4 py-2 text-left hover:bg-orange-600 hover:text-white ${
+                            selectedPet?.pet_id === pet.pet_id ? 'bg-orange-900' : ''
+                          } text-orange-300`}
+                        >
+                          {pet.pet_name}
+                        </button>
+                      );
+                    })
                   ) : (
                     <p className="text-gray-500">No pets found.</p>
                   )}
