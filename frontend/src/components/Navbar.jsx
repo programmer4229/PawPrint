@@ -4,7 +4,7 @@ import { AuthContext } from "../shared/context/auth-context";
 
 const Navbar = ({ onNavigate }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { userName, logout } = useContext(AuthContext);
+  const { userName, userType, logout } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const toggleMenu = () => {
@@ -48,11 +48,13 @@ const Navbar = ({ onNavigate }) => {
 
       {isMenuOpen && (
         <div className="absolute top-16 right-0 w-48 bg-white rounded-md shadow-lg py-1 z-10">
-          <div
-            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 hover:text-orange-900"
-          >
-            <Link to='/petselection'>Pet Profiles</Link>
-          </div>
+          {userType === 'Owner' && (
+            <div
+              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 hover:text-orange-900"
+            >
+              <Link to='/petselection'>Pet Profiles</Link>
+            </div>
+          )}
           <button
             className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 hover:text-orange-900 cursor-pointer"
             onClick={handleLogout}  // Call handleLogout on click

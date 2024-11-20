@@ -66,6 +66,8 @@ async function getOwnersForVet(req, res, next) {
     } catch (err) {
         console.error('Error fetching owners:', err);
         res.status(500).json({ message: 'Internal server error' });
+    } finally {
+        await sequelize.close(); // Ensure connection is closed
     }
 }
 

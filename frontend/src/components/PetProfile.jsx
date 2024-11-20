@@ -100,6 +100,7 @@ const PetProfile = () => {
       // console.log("Fetched adoption info:", response.data);
     } catch (error) {
       console.error("Error fetching adoption info:", error);
+      setAdoptionInfo(null);
     }
   };
 
@@ -122,6 +123,7 @@ const PetProfile = () => {
         setVaccinations([]);
       } else {
         console.error("Error fetching vaccinations:", error);
+        setVaccinations([]);
       }
     }
   };
@@ -145,6 +147,7 @@ const PetProfile = () => {
         setMedications([]);
       } else {
         console.error("Error fetching medications:", error);
+        setMedications([]);
       }
     }
   };
@@ -159,6 +162,7 @@ const PetProfile = () => {
         console.log("Fetched weights:", response.data);
     } catch (error) {
         console.error("Error fetching weights:", error);
+        setWeightData([]);
     }
   };
 
