@@ -107,6 +107,7 @@ const VetPortal = () => {
 
   const selectPet = async (pet) => {
     console.log("Selected Pet:", pet);
+    setSelectedPet(null);
     setSelectedPet(pet);
     // fetchAppointments(pet.id);
     const token = localStorage.getItem('token');
@@ -172,13 +173,13 @@ const VetPortal = () => {
                 <div className="pl-8">
                   {owner.pets?.length > 0 ? (
                     owner.pets.map((pet) => {
-                      console.log("Rendering Pet:", pet);
+                      // console.log("Rendering Pet:", pet);
                       return (
                         <button
                           key={pet.pet_id}
                           onClick={() => selectPet(pet)}
                           className={`w-full px-4 py-2 text-left hover:bg-orange-600 hover:text-white ${
-                            selectedPet?.pet_id === pet.pet_id ? 'bg-orange-900' : ''
+                            owner.pets?.length > 0 ? 'bg-orange-900' : ''
                           } text-orange-300`}
                         >
                           {pet.pet_name}
@@ -279,8 +280,8 @@ const VetPortal = () => {
                         <div>
                             <p><strong>Reason for Visit:</strong> {lastVisitData.appointment.reason}</p>
                             <p><strong>Reported Weight:</strong> {lastVisitData.weights.length > 0 ? lastVisitData.weights[0].weight + ' lbs' : 'N/A'}</p>
-                            <p><strong>Prescribed Medications:</strong> {lastVisitData.medications.length > 0 ? lastVisitData.medications.map(med => med.medicationname).join(', ') : 'N/A'}</p>
-                            <p><strong>Vaccinations:</strong> {lastVisitData.vaccinations.length > 0 ? lastVisitData.vaccinations.map(vac => vac.vaccinationname).join(', ') : 'N/A'}</p>
+                            <p><strong>Prescribed Medications:</strong> {lastVisitData.medications.length > 0 ? lastVisitData.medications.map(med => med.medicationName).join(', ') : 'N/A'}</p>
+                            <p><strong>Vaccinations:</strong> {lastVisitData.vaccinations.length > 0 ? lastVisitData.vaccinations.map(vac => vac.vaccinationName).join(', ') : 'N/A'}</p>
                         </div>
                         <div>
                             <p><strong>Notes:</strong></p>

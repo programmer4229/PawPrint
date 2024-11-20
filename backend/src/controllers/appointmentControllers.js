@@ -67,6 +67,7 @@ async function getLastVisitData(req, res) {
             replacements: {
                 vetNameCondition: JSON.stringify({ name: vetName }),
             },
+            attributes: ['id', 'date', 'time', 'reason', 'petId', 'careTaker', 'notes'],
             order: [['date', 'DESC']],
         });
 
