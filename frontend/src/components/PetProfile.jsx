@@ -65,6 +65,7 @@ const PetProfile = () => {
 
   //for editing pet
   const [showEditModal, setShowEditModal] = useState(false);
+  const [editFormData, setEditFormData] = useState(null);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -207,18 +208,16 @@ const PetProfile = () => {
   const handleEditPet = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem('token');
-  
     try {
       const formData = new FormData();
-
-      Object.keys(petData).forEach((key) => {
-        // if (key !== 'image') {
-          formData.append(key, petData[key]);
-        // }
+      Object.keys(editFormData).forEach((key) => {
+        formData.append(key, editFormData[key]);
       });
   
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/pets/create`,
+      formData.append('id', editFormData.id);
+  
+      await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/pets/update`,
         formData,
         {
           headers: {
@@ -228,21 +227,13 @@ const PetProfile = () => {
         }
       );
   
-      //setPets((prevPets) => [...prevPets, response.data.pet]); // Add new pet to the existing state
-      setStatusMessage('Pet edited successfully!');
-      closeModal();
+      // Refetch pet data to ensure it is up-to-date
+      await fetchPetData();
+  
+      handleCloseEditModal(); // Close the modal
     } catch (error) {
       console.error('Error editing pet:', error);
-      setStatusMessage('Failed to edit pet. Please try again.');
     }
-  };
-
-  const handleOpenEditModal = () => {
-    setShowEditModal(true);
-  };
-
-  const handleCloseEditModal = () => {
-    setShowEditModal(false);
   };
 
   // Handle file selection
@@ -335,6 +326,20 @@ const PetProfile = () => {
     setShareEmail(''); // Clear the email input
   };
 
+  const handleOpenEditModal = () => {
+    setEditFormData({ ...petData }); // Populate the modal form with current pet data
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditFormData({ ...editFormData, [name]: value }); // Update modal form values
+  };
+
   // Function to update pet services
   const updateServices = (updatedServices) => {
     setPetData((prevPet) => ({
@@ -418,8 +423,8 @@ const PetProfile = () => {
                   <input
                     type="text"
                     name="name"
-                    value={petData.name}
-                    onChange={handleInputChange}
+                    value={editFormData?.name || ''}
+                    onChange={handleEditInputChange}
                     className="w-full px-3 py-2 border rounded"
                     required
                   />
@@ -429,8 +434,8 @@ const PetProfile = () => {
                   <input
                     type="text"
                     name="type"
-                    value={petData.type}
-                    onChange={handleInputChange}
+                    value={editFormData?.type || ''}
+                    onChange={handleEditInputChange}
                     className="w-full px-3 py-2 border rounded"
                     placeholder="e.g., dog or cat"
                     required
@@ -441,8 +446,8 @@ const PetProfile = () => {
                   <input
                     type="text"
                     name="breed"
-                    value={petData.breed}
-                    onChange={handleInputChange}
+                    value={editFormData?.breed || ''}
+                    onChange={handleEditInputChange}
                     className="w-full px-3 py-2 border rounded"
                   />
                 </div>
@@ -451,8 +456,8 @@ const PetProfile = () => {
                   <input
                     type="date"
                     name="dateOfBirth"
-                    value={petData.dateOfBirth}
-                    onChange={handleInputChange}
+                    value={editFormData?.dateOfBirth || ''}
+                    onChange={handleEditInputChange}
                     className="w-full px-3 py-2 border rounded"
                   />
                 </div>
@@ -460,19 +465,12 @@ const PetProfile = () => {
                   <label className="block text-gray-700 font-medium mb-2">Care Instructions</label>
                   <textarea
                     name="careInstructions"
-                    value={petData.careInstructions}
-                    onChange={handleInputChange}
+                    value={editFormData?.careInstructions || ''}
+                    onChange={handleEditInputChange}
                     className="w-full px-3 py-2 border rounded"
                     placeholder="Provide any special care instructions"
                   ></textarea>
                 </div>
-                {/* <div className="mb-4">
-                  <label className="block text-gray-700 font-medium mb-2">Upload Image</label>
-                  <input type="file" onChange={handleImageUpload} />
-                </div> */}
-                {/* {statusMessage && (
-                  <p className="text-center text-green-500 mb-4">{statusMessage}</p>
-                )} */}
                 <div className="flex justify-end">
                   <button
                     type="button"

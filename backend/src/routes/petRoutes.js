@@ -8,6 +8,7 @@ const sequelize = require('../config/database');
 
 // existing routes
 router.post('/create', authMiddleware, upload.single('image'), petControllers.createPet);
+router.post('/update', authMiddleware, upload.single('image'), petControllers.updatePet);
 router.get('/get', authMiddleware, petControllers.getPets);
 router.patch('/profile/:id', authMiddleware, petControllers.updatePet);
 router.delete('/profile/:id', authMiddleware, petControllers.deletePet);
