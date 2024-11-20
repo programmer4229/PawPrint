@@ -50,15 +50,22 @@ async function deleteAppointment(req, res, next) {
 async function getLastVisitData(req, res) {
     const { petId, vetName } = req.query;
     console.log('petId:', petId);
-    console.log('vetName:', vetName);    
+    console.log('vetName:', vetName); 
+    
+    if (!petId || !vetName) {
+        return res.status(400).json({ message: 'Missing petId or vetName in request' });
+    }
 
     try {
         const lastAppointment = await Appointment.findOne({
             where: {
-                petid: petId, // Ensure this matches the database column name
+                petId,
                 [Sequelize.Op.and]: Sequelize.literal(
-                    `"caretaker"::jsonb @> '{"name": "${vetName}"}'`
+                    `(caretaker::jsonb @> :vetNameCondition)`
                 ),
+            },
+            replacements: {
+                vetNameCondition: JSON.stringify({ name: vetName }),
             },
             order: [['date', 'DESC']],
         });
@@ -66,13 +73,7 @@ async function getLastVisitData(req, res) {
         console.log("lastAppointment:", lastAppointment);
         
         if (!lastAppointment) {
-            console.log('No matching appointment found for query:', {
-                petId,
-                vetName,
-            });
-        }
-
-        if (!lastAppointment) {
+            console.log('No matching appointment found for query:', { petId, vetName });
             return res.status(404).json({ message: 'No appointments found for this pet and vet.' });
         }
 
@@ -80,21 +81,21 @@ async function getLastVisitData(req, res) {
 
         const weights = await PetWeight.findAll({
             where: {
-                petid: petId, // Matches `petid` in database
+                petId,
                 date: appointmentDate,
             },
         });
 
         const vaccinations = await Vaccination.findAll({
             where: {
-                petid: petId, // Matches `petid` in database
+                petId,
                 vaccinationdate: appointmentDate,
             },
         });
 
         const medications = await Medication.findAll({
             where: {
-                petid: petId, // Matches `petid` in database
+                petId,
                 medicationdate: appointmentDate,
             },
         });

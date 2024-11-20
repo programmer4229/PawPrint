@@ -29,11 +29,10 @@ const Appointment = sequelize.define('Appointment', {
         allowNull: true,
         field: 'caretaker'
     },
-}
-);
-
-
-
+}, {
+    tableName: 'appointments',
+    timestamps: false
+});
 
 
 module.exports = Appointment;

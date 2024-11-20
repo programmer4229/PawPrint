@@ -105,11 +105,8 @@ const VetPortal = () => {
     );
   };
 
-// useEffect(() => {
-//     console.log("Updated Owners with Pets:", owners);
-// }, [owners]);
-
   const selectPet = async (pet) => {
+    console.log("Selected Pet:", pet);
     setSelectedPet(pet);
     // fetchAppointments(pet.id);
     const token = localStorage.getItem('token');
@@ -120,7 +117,7 @@ const VetPortal = () => {
           {
               headers: { Authorization: `Bearer ${token}` },
               params: {
-                petId: pet.id,
+                petId: pet.pet_id,
                 vetName: userName
               },
           }
@@ -175,7 +172,7 @@ const VetPortal = () => {
                 <div className="pl-8">
                   {owner.pets?.length > 0 ? (
                     owner.pets.map((pet) => {
-                      // console.log("Rendering Pet:", pet);
+                      console.log("Rendering Pet:", pet);
                       return (
                         <button
                           key={pet.pet_id}
