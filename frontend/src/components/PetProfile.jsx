@@ -204,21 +204,37 @@ const PetProfile = () => {
   };
 
   //edit pet
-  const handleEditPet = async () => {
-    // const token = localStorage.getItem('token');
+  const handleEditPet = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+  
+    try {
+      const formData = new FormData();
 
-    // try {
-    //   await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/pets/profile/${petData.id}`, {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`,
-    //     },
-    //   });
-    //   // alert('Pet deleted successfully.');
-    //   navigate('/petselection'); // Navigate back to the pet selection page
-    // } catch (error) {
-    //   console.error('Error deleting pet:', error);
-    //   // alert('Failed to delete the pet. Please try again.');
-    // }
+      Object.keys(petData).forEach((key) => {
+        // if (key !== 'image') {
+          formData.append(key, petData[key]);
+        // }
+      });
+  
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/pets/create`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
+  
+      //setPets((prevPets) => [...prevPets, response.data.pet]); // Add new pet to the existing state
+      setStatusMessage('Pet edited successfully!');
+      closeModal();
+    } catch (error) {
+      console.error('Error editing pet:', error);
+      setStatusMessage('Failed to edit pet. Please try again.');
+    }
   };
 
   const handleOpenEditModal = () => {
