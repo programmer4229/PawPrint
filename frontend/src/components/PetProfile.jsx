@@ -63,6 +63,13 @@ const PetProfile = () => {
   const navigate = useNavigate();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
+  //for editing pet
+  const [showEditModal, setShowEditModal] = useState(false);
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setPetData({ ...petData, [name]: value });
+  };
 
   // Fetch pet data by ID
   const fetchPetData = async () => {
@@ -194,6 +201,32 @@ const PetProfile = () => {
 
   const handleCloseDeleteModal = () => {
     setShowDeleteModal(false);
+  };
+
+  //edit pet
+  const handleEditPet = async () => {
+    // const token = localStorage.getItem('token');
+
+    // try {
+    //   await axios.delete(`${process.env.REACT_APP_API_BASE_URL}/pets/profile/${petData.id}`, {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`,
+    //     },
+    //   });
+    //   // alert('Pet deleted successfully.');
+    //   navigate('/petselection'); // Navigate back to the pet selection page
+    // } catch (error) {
+    //   console.error('Error deleting pet:', error);
+    //   // alert('Failed to delete the pet. Please try again.');
+    // }
+  };
+
+  const handleOpenEditModal = () => {
+    setShowEditModal(true);
+  };
+
+  const handleCloseEditModal = () => {
+    setShowEditModal(false);
   };
 
   // Handle file selection
@@ -345,6 +378,102 @@ const PetProfile = () => {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Edit Button (Visible only to owner) */}
+      {isOwner && (
+        <button
+          onClick={handleOpenEditModal}
+          className="bg-blue-500 text-white px-4 py-2 rounded-full mt-4 hover:bg-blue-600 transition-colors"
+        >
+          Edit Pet Profile
+        </button>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white p-6 rounded shadow-lg w-96">
+              <h2 className="text-xl font-bold mb-4">Add a New Pet</h2>
+              <form onSubmit={handleEditPet}>
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={petData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border rounded"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Type</label>
+                  <input
+                    type="text"
+                    name="type"
+                    value={petData.type}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border rounded"
+                    placeholder="e.g., dog or cat"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Breed</label>
+                  <input
+                    type="text"
+                    name="breed"
+                    value={petData.breed}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Date of Birth</label>
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={petData.dateOfBirth}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border rounded"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Care Instructions</label>
+                  <textarea
+                    name="careInstructions"
+                    value={petData.careInstructions}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border rounded"
+                    placeholder="Provide any special care instructions"
+                  ></textarea>
+                </div>
+                {/* <div className="mb-4">
+                  <label className="block text-gray-700 font-medium mb-2">Upload Image</label>
+                  <input type="file" onChange={handleImageUpload} />
+                </div> */}
+                {/* {statusMessage && (
+                  <p className="text-center text-green-500 mb-4">{statusMessage}</p>
+                )} */}
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleCloseEditModal}
+                    className="bg-red-500 text-white px-4 py-2 rounded mr-2"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="bg-blue-500 text-white px-4 py-2 rounded"
+                  >
+                    Save
+                  </button>
+                </div>
+              </form>
+            </div>
         </div>
       )}
 
