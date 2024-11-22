@@ -7,11 +7,14 @@ const Meal = require('./FoodInfo');
 const PetWeight = require('./PetWeight');
 const Appointment = require('./Appointments');
 const SharedPets = require('./SharedPets');
-const { AdoptionInfo, Vaccination, Medication } = require('./MedicalHistory');
+const { AdoptionInfo, VetInfo, Vaccination, Medication } = require('./MedicalHistory');
 
 // a pet can only have one adoptionInfo entry
 Pet.hasOne(AdoptionInfo, {foreignKey: 'petId'});
 AdoptionInfo.belongsTo(Pet, {foreignKey: 'petId'});
+// a pet can only have one primary vet
+Pet.hasOne(VetInfo, {foreignKey: 'petId'});
+VetInfo.belongsTo(Pet, {foreignKey: 'petId'});
 // a pet can have many vaccines
 Pet.hasMany(Vaccination, {foreignKey: 'petId'});
 Vaccination.belongsTo(Pet, {foreignKey: 'petId'});
@@ -40,6 +43,7 @@ module.exports = {
     User,
     Pet,
     AdoptionInfo,
+    VetInfo,
     Vaccination,
     Medication,
     Meal,

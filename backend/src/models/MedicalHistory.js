@@ -3,9 +3,52 @@ const sequelize = require('../config/database');
 const Pet = require('./Pets');
 
 const AdoptionInfo = sequelize.define('AdoptionInfo', {
+    adoption_id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        field: 'adoption_id'
+    },
     petId: {
         type: DataTypes.UUID,
+        allowNull: false,
+        references: {
+            model: Pet,
+            key: 'id'
+        },
+        onDelete: 'CASCADE',
+        field: 'petid'
+    },
+    shelterName: {
+        type: DataTypes.STRING,
+        field: 'sheltername'
+    },
+    shelterAddress: {
+        type: DataTypes.STRING,
+        field: 'shelteraddress'
+    },
+    phoneNumber: {
+        type: DataTypes.STRING,
+        field: 'phonenumber'
+    },
+    adoptionDate: {
+        type: DataTypes.DATEONLY,
+        field: 'firstvisitdate'
+    }
+}, {
+    tableName: 'adoptioninfo',
+    timestamps: false
+});
+
+const VetInfo = sequelize.define('VetInfo', {
+    vet_id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         primaryKey: true,
+        field: 'vet_id'
+    },
+    petId: {
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
             model: Pet,
@@ -18,24 +61,24 @@ const AdoptionInfo = sequelize.define('AdoptionInfo', {
         type: DataTypes.STRING,
         field: 'vetname'
     },
-    officeName: {
+    phoneNumber: {
         type: DataTypes.STRING,
-        field: 'officename'
+        field: 'phonenumber'
     },
-    firstVisitDate: {
-        type: DataTypes.DATEONLY,
-        field: 'firstvisitdate'
+    officeAddress: {
+        type: DataTypes.STRING,
+        field: 'officeaddress'
     },
     lastVisitDate: {
         type: DataTypes.DATEONLY,
         field: 'lastvisitdate'
     },
-    phoneNumber: {
-        type: DataTypes.STRING,
-        field: 'phonenumber'
+    nextVisitDate: {
+        type: DataTypes.DATEONLY,
+        field: 'nextvisitdate'
     }
 }, {
-    tableName: 'adoptioninfo',
+    tableName: 'vetinfo',
     timestamps: false
 });
 
@@ -127,4 +170,4 @@ const Medication = sequelize.define('Medication', {
     timestamps: false
 });
 
-module.exports = { AdoptionInfo, Vaccination, Medication };
+module.exports = { AdoptionInfo, VetInfo, Vaccination, Medication };
