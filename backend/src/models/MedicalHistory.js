@@ -39,6 +39,48 @@ const AdoptionInfo = sequelize.define('AdoptionInfo', {
     timestamps: false
 });
 
+const VetInfo = sequelize.define('VetInfo', {
+    vet_id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        field: 'vet_id'
+    },
+    petId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: {
+            model: Pet,
+            key: 'id'
+        },
+        onDelete: 'CASCADE',
+        field: 'petid'
+    },
+    vetName: {
+        type: DataTypes.STRING,
+        field: 'vetname'
+    },
+    phoneNumber: {
+        type: DataTypes.STRING,
+        field: 'phonenumber'
+    },
+    officeAddress: {
+        type: DataTypes.STRING,
+        field: 'officeaddress'
+    },
+    lastVisitDate: {
+        type: DataTypes.DATEONLY,
+        field: 'lastvisitdate'
+    },
+    nextVisitDate: {
+        type: DataTypes.DATEONLY,
+        field: 'nextvisitdate'
+    }
+}, {
+    tableName: 'vetinfo',
+    timestamps: false
+});
+
 const Vaccination = sequelize.define('Vaccination', {
     vaccination_id: {
         type: DataTypes.UUID,
@@ -127,4 +169,4 @@ const Medication = sequelize.define('Medication', {
     timestamps: false
 });
 
-module.exports = { AdoptionInfo, Vaccination, Medication };
+module.exports = { AdoptionInfo, VetInfo, Vaccination, Medication };

@@ -44,6 +44,8 @@ router.get('/owner/:ownerId', authMiddleware, async (req, res) => {
 router.get('/profile/:id/adoption', authMiddleware, petControllers.getAdoptionInfo);
 router.get('/profile/:id/vaccination', authMiddleware, petControllers.getVaccinations);
 router.get('/profile/:id/medication', authMiddleware, petControllers.getMedications);
+router.get('/vet/:petId', authMiddleware, petControllers.getVetInfo);
+router.put('/vet/:petId', authMiddleware, petControllers.updateVetInfo);
 
 // route to get weights for a specific pet
 router.get('/profile/:id/weights', authMiddleware, petControllers.getPetWeights);

@@ -30,6 +30,19 @@ const calculateAge = (birthDate) => {
   return `${years} years, ${months} months`;
 };
 
+// helper function to format phone number (when editing vets phone #)
+function formatPhoneNumber(value) {
+  if (!value) return value;
+
+  // Remove all non-digit characters from the input
+  const phoneNumber = value.replace(/[^\d]/g, '');
+
+  // Format the phone number as (###) ###-####
+  if (phoneNumber.length <= 3) return `(${phoneNumber}`;
+  if (phoneNumber.length <= 6) return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+  return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+}
+
 const PetProfile = () => {
   const { userName } = useContext(AuthContext);
   // console.log("User's name from AuthContext:", userName);
@@ -42,6 +55,8 @@ const PetProfile = () => {
   // for pet info
   const [petData, setPetData] = useState(null);
   const [adoptionInfo, setAdoptionInfo] = useState(null);
+  const [vetInfo, setVetInfo] = useState(null);
+  const [isEditingVetInfo, setIsEditingVetInfo] = useState(false);
   const [vaccinations, setVaccinations] = useState([]);
   const [medications, setMedications] = useState([]);
   const [weightData, setWeightData] = useState([]);
@@ -112,6 +127,29 @@ const PetProfile = () => {
     }
   };
 
+  // Fetch Adoption Info by ID
+  const fecthVetInfo = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/vet/${petId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'userId': userId,
+        }
+      });
+      setVetInfo(response.data);
+      console.log("Fetched vet info:", response.data);
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+            console.warn('No vet info found for this pet.');
+            setVetInfo(null); // No vet info available
+        } else {
+            console.error('Error fetching vet info:', error);
+        }
+    }
+  };
+
   // Fetch Vaccinations by ID
   const fetchVaccinations = async () => {
     const token = localStorage.getItem('token');
@@ -167,7 +205,7 @@ const PetProfile = () => {
             headers: { 'Authorization': `Bearer ${token}` }
         });
         setWeightData(response.data);
-        console.log("Fetched weights:", response.data);
+        // console.log("Fetched weights:", response.data);
     } catch (error) {
         console.error("Error fetching weights:", error);
         setWeightData([]);
@@ -177,6 +215,7 @@ const PetProfile = () => {
   useEffect(() => {
     fetchPetData();
     fetchAdoptionInfo();
+    fecthVetInfo();
     fetchVaccinations();
     fetchMedications();
     fetchWeights();
@@ -196,7 +235,33 @@ const PetProfile = () => {
       navigate('/petselection'); // Navigate back to the pet selection page
     } catch (error) {
       console.error('Error deleting pet:', error);
-      // alert('Failed to delete the pet. Please try again.');
+      alert('Failed to delete the pet. Please try again.');
+    }
+  };
+
+  const handleVetInfoSubmit = async (e) => {
+    e.preventDefault();
+
+    const token = localStorage.getItem('token');
+  
+    try {
+      await axios.put(
+        `${process.env.REACT_APP_API_BASE_URL}/pets/vet/${petId}`,
+        vetInfo,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // Fetch the updated vet info
+      const response = await axios.get(
+          `${process.env.REACT_APP_API_BASE_URL}/pets/vet/${petId}`,
+          { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setVetInfo(response.data);  // update edited vet info
+
+      setIsEditingVetInfo(false);
+    } catch (error) {
+      console.error('Error updating vet info:', error);
+      alert('Failed to update vet info. Please try again.');
     }
   };
 
@@ -520,14 +585,14 @@ const PetProfile = () => {
                 </label>
                 <button
                   type="submit"
-                  className="bg-green-500 text-white px-4 py-2 rounded mt-2 w-full"
+                  className="bg-orange-500 text-white px-4 py-2 rounded mt-2 w-full hover:bg-orange-600"
                 >
                   Share
                 </button>
                 <button
                   type="button"
                   onClick={closeModal}
-                  className="bg-red-500 text-white px-4 py-2 rounded mt-2 w-full"
+                  className="bg-gray-500 text-white px-4 py-2 rounded mt-2 w-full hover:bg-gray-600"
                 >
                   Cancel
                 </button>
@@ -562,7 +627,6 @@ const PetProfile = () => {
             {isOwner && (
               <div
                 className="absolute bottom-3 right-3 bg-white p-1 rounded-full shadow-md cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-                // onClick={openUploadModal}
               >
                 <FaCamera className="text-orange-500" />
               </div>
@@ -629,18 +693,93 @@ const PetProfile = () => {
           <div>
             <div className="grid grid-cols-2 gap-6 mb-6">
               <div>
-                <h3 className="text-lg font-semibold mb-2">Physician Information</h3>
-              <p>Primary Physician: {adoptionInfo?.vetName || 'N/A'}</p>
-              <p>Office: {adoptionInfo?.officeName || 'N/A'}</p>
-              <p>Phone: {adoptionInfo?.phoneNumber || 'N/A'}</p>
-              <p>First Visit: {adoptionInfo?.firstVisitDate || 'N/A'}</p>
-              <p>Last Visit: {adoptionInfo?.lastVisitDate || 'N/A'}</p>
+                <h3 className="text-lg font-semibold mb-2">Primary Vet Information</h3>
+                  {/* Edit Button (for owners only) */}
+                  {isOwner && !isEditingVetInfo && (
+                    <button
+                      onClick={() => setIsEditingVetInfo(true)}
+                      className="text-orange-500 hover:text-orange-700 mb-4"
+                    >
+                      Edit Vet Info
+                    </button>
+                  )}
+
+                    {/* Display Primary Vet Info */}
+                    {!isEditingVetInfo && vetInfo.vetName !== 'N/A' ? (
+                      <div>
+                        <p><strong>Primary Vet:</strong> {vetInfo?.vetName}</p>
+                        <p><strong>Office Address:</strong> {vetInfo?.officeAddress}</p>
+                        <p><strong>Phone:</strong> {vetInfo?.phoneNumber}</p>
+                        <p><strong>Last Visit:</strong> {vetInfo?.lastVisitDate || <em>coming soon</em>}</p>
+                        <p><strong>Next Visit:</strong> {vetInfo?.nextVisitDate || <em>coming soon</em>}</p>
+                      </div>
+                    ) : (
+                      <p>No primary vet info available for {petData.name}.</p>
+                    )}
+                    
+                    {/* Editable Form for Vet Info (Only for Owners) */}
+                    {isEditingVetInfo && isOwner && (
+                      <form onSubmit={handleVetInfoSubmit} className="mt-4 space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Vet Name</label>
+                          <input
+                            type="text"
+                            value={vetInfo.vetName === 'N/A' ? '' : vetInfo.vetName} // Clear value if 'N/A'
+                            onChange={(e) => setVetInfo({ ...vetInfo, vetName: e.target.value })}
+                            className="w-full px-3 py-2 border rounded-md"
+                            placeholder={vetInfo.vetName === 'N/A' ? 'Enter Vet Name (eg.: John Doe)' : ''} // Show placeholder if 'N/A'
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                          <input
+                            type="text"
+                            value={vetInfo.phoneNumber === 'N/A' ? '' : vetInfo.phoneNumber}
+                            onChange={(e) => {
+                              const formattedNumber = formatPhoneNumber(e.target.value);
+                              setVetInfo({ ...vetInfo, phoneNumber: formattedNumber });
+                            }}                        
+                            className="w-full px-3 py-2 border rounded-md"
+                            placeholder={vetInfo.phoneNumber === 'N/A' ? 'Enter Phone Number' : ''}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Office Address</label>
+                          <input
+                            type="text"
+                            value={vetInfo.officeAddress === 'N/A' ? '' : vetInfo.officeAddress}
+                            onChange={(e) => setVetInfo({ ...vetInfo, officeAddress: e.target.value })}
+                            className="w-full px-3 py-2 border rounded-md"
+                            placeholder={vetInfo.officeAddress === 'N/A' ? 'Enter Office Address' : ''}
+                          />
+                        </div>
+
+                        {/* Buttons */}
+                        <div className="flex space-x-4">
+                          <button
+                            type="submit"
+                            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+                          >
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingVetInfo(false)}
+                            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    )}
               </div>
               <div>
                 <h3 className="text-lg font-semibold mb-2">Adoption Information</h3>
-                <p>Adoption Date: July 15, 2015</p>
-                <p>Rescue Center: Paw Haven</p>
-                <p>Adoption Fee: $250</p>
+                  <p>Adoption Date: July 15, 2015</p>
+                  <p>Rescue Center: Paw Haven</p>
+                  <p>Adoption Fee: $250</p>
               </div>
             </div>
             {/* Vaccines Section */}

@@ -1,6 +1,6 @@
 const Pet = require('../models/Pets');
 const User = require('../models/Users');
-const { AdoptionInfo, Vaccination, Medication } = require('../models/MedicalHistory');
+const { AdoptionInfo, VetInfo, Vaccination, Medication } = require('../models/MedicalHistory');
 const SharedPets = require('../models/SharedPets');
 const PetWeight = require('../models/PetWeight');
 const sequelize = require('../config/database');
@@ -156,6 +156,62 @@ async function getAdoptionInfo(req, res) {
     } catch (error) {
         console.error('Error fetching adoption info:', error);
         res.status(500).json({ message: error.message });
+    }
+}
+
+// Fetch vet info
+async function getVetInfo(req, res) {
+    // console.log("Pet ID using req.params:", req.params.id);
+
+    try {
+        const vetInfo = await VetInfo.findOne({ where: { petId: req.params.petId } });
+        
+        if (!vetInfo) {
+            return res.status(200).json({
+                vetName: 'N/A',
+                phoneNumber: 'N/A',
+                officeAddress: 'N/A',
+            });
+        }
+
+        res.status(200).json(vetInfo);
+    } catch (err) {
+        console.error('Error fetching vet info:', err);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+}
+
+// Update vet info
+async function updateVetInfo(req, res) {
+    const { petId } = req.params;
+    const { vetName, phoneNumber, officeAddress } = req.body;
+
+    // console.log('Received petId:', petId);
+
+    try {
+        const vetInfo = await VetInfo.findOne({ where: { petId } });
+
+        if (!vetInfo) {
+            const newVetInfo = await VetInfo.create({
+                petId,
+                vetName,
+                phoneNumber,
+                officeAddress,
+            });
+            return res.status(201).json({ message: 'Vet info created successfully.', newVetInfo });
+        } else {
+            // Update vet info
+            await vetInfo.update({
+                vetName,
+                phoneNumber,
+                officeAddress,
+            });
+        }
+
+        res.status(200).json({ message: 'Vet info updated successfully.' });
+    } catch (error) {
+        console.error('Error updating vet info:', error);
+        res.status(500).json({ message: 'Failed to update vet info', error });
     }
 }
 
@@ -336,6 +392,8 @@ module.exports = {
     deletePet, 
     getPetById, 
     getAdoptionInfo,
+    getVetInfo,
+    updateVetInfo,
     getVaccinations,
     getMedications,
     sharePetProfile,

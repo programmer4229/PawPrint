@@ -4,18 +4,18 @@ const app = express();
 const sequelize = require('./src/config/database');
 const cors = require('cors');
 
-// require('./src/models/index');
+require('./src/models/index');
 
-const {
-    User,
-    Pet,
-    Meal,
-    Appointment,
-    AdoptionInfo,
-    Vaccination,
-    Medication,
-    SharedPets
-} = require('./src/models/index');
+// const {
+//     User,
+//     Pet,
+//     Meal,
+//     Appointment,
+//     AdoptionInfo,
+//     Vaccination,
+//     Medication,
+//     SharedPets
+// } = require('./src/models/index');
 
 // console.log("Associations for User:", User.associations);
 // console.log("Associations for Pet:", Pet.associations);
