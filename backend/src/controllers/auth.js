@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const fs = require('fs');
 const User = require('../models/Users');
 const jwt = require('jsonwebtoken');
+const { sendWelcomeEmail } = require('../utils/emailSender');
+
 
 const client = new Client({
   host: process.env.DB_HOST,
@@ -30,6 +32,7 @@ async function registerUser(req, res, next) {
   try {
       const passwordHash = await bcrypt.hash(req.body.password, 10);
       
+      // Create user in database
       const user = await User.create(
           {
               name: req.body.name,
@@ -41,6 +44,14 @@ async function registerUser(req, res, next) {
           },
           { fields: ['name', 'email', 'password', 'phone', 'address', 'type'] }
       );
+
+    // Send welcome email
+    try {
+      await sendWelcomeEmail(user.email, user.name);
+      console.log(`Welcome email sent to ${user.email}`);
+    } catch (emailError) {
+      console.error('Failed to send welcome email:', emailError);
+    }
 
       res.json({ message: 'User registered successfully' });
   } catch (err) {

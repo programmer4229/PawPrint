@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from "../shared/context/auth-context";
 
@@ -6,8 +6,18 @@ const Navbar = ({ onNavigate }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { userName, userType, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const menuButtonRef = useRef(null); // Reference to the menu button
+  const [dropdownStyles, setDropdownStyles] = useState({}); // Dynamic dropdown styles
 
   const toggleMenu = () => {
+    if (!isMenuOpen && menuButtonRef.current) {
+      const buttonRect = menuButtonRef.current.getBoundingClientRect(); // Get button position
+      setDropdownStyles({
+        position: 'absolute',
+        top: `${buttonRect.bottom + window.scrollY}px`, // Align below the button
+        left: `${buttonRect.right - 192}px`, // Align with the button's right edge minus dropdown width (192px)
+      });
+    }
     setIsMenuOpen(!isMenuOpen);
   };
 
@@ -27,6 +37,7 @@ const Navbar = ({ onNavigate }) => {
           <div className="flex items-center">
             <span className="text-white font-semibold">{userName || 'Welcome!'}</span>
             <button
+            ref={menuButtonRef}
               onClick={toggleMenu}
               className="inline-flex items-center justify-center p-3 rounded-md text-white hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
               aria-expanded={isMenuOpen}
@@ -46,18 +57,22 @@ const Navbar = ({ onNavigate }) => {
         </div>
       </div>
 
+      {/* Dropdown Menu */}
       {isMenuOpen && (
-        <div className="absolute top-16 right-0 w-48 bg-white rounded-md shadow-lg py-1 z-10">
+        <div
+          className="absolute top-16 right-0 w-48 bg-white rounded-md shadow-lg py-1 z-10"
+          style={dropdownStyles} // Adjust '12px' to match the exact alignment
+        >
           {userType === 'Owner' && (
             <div
-              className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 hover:text-orange-900"
+              className="block text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 hover:text-orange-900"
             >
-              <Link to='/petselection'>Pet Profiles</Link>
+              <Link to="/petselection">Pet Profiles</Link>
             </div>
           )}
           <button
-            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 hover:text-orange-900 cursor-pointer"
-            onClick={handleLogout}  // Call handleLogout on click
+            className="block text-left px-4 py-2 text-sm text-gray-700 hover:bg-orange-100 hover:text-orange-900 cursor-pointer"
+            onClick={handleLogout}
           >
             Sign Out
           </button>
