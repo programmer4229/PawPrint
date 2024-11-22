@@ -18,6 +18,8 @@ function Register() {
     const [address, setAddress] = useState('');
     const [userType, setUserType] = useState('');
     const [message, setMessage] = useState('');
+    const [showSuccessModal, setShowSuccessModal] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);  // for loading modal
 
     if (showSignIn) {
         navigate('/signin');
@@ -46,6 +48,8 @@ function Register() {
         }
 
         try {
+            setIsLoading(true); // Show loading modal
+
             // Check email uniqueness
             const checkEmailResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}/users/check-email`, {
                 method: 'POST',
@@ -75,14 +79,20 @@ function Register() {
             if (!response.ok) {
                 throw new Error(responseData.message);
             }
-            console.log("Successfully Registered");
-            setMessage("Successfully Registered! Redirecting to Sign In...");
-            setShowSignIn(true);
-            return <SignIn />;
+
+            setIsLoading(false); // hide loading modal
+            setShowSuccessModal(true);
+            setTimeout(() => handleModalClose(), 2500);
         } catch (error) {
+            setIsLoading(false); // hide loading modal
             console.log(error);
             setMessage("Registration failed: " + error.message);
         }
+    };
+
+    const handleModalClose = () => {
+        setShowSuccessModal(false);
+        navigate('/signin'); // Redirect to Sign In page
     };
 
     return (
@@ -273,6 +283,26 @@ function Register() {
                             Login!
                         </button>
                     </div>
+
+                    {/* Loading Modal */}
+                    {isLoading && (
+                        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+                            <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
+                                <h2 className="text-2xl font-bold text-orange-500 mb-4">Registering User...</h2>
+                                <p>Please wait while we process your registration.</p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Success Modal */}
+                    {showSuccessModal && (
+                        <div className="fixed inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center">
+                            <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
+                                <h2 className="text-2xl font-bold text-green-500 mb-4">Registration Successful</h2>
+                                <p>Welcome to PawPrint, {name}!</p>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

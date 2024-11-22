@@ -23,7 +23,7 @@ function SignIn() {
                 password,
             });
             const { userId, userName, userType, token } = response.data;
-            console.log("Login response data:", { userId, userName, userType, token });
+            // console.log("Login response data:", { userId, userName, userType, token });
 
             // Check for token in the response and store it in localStorage
             if (token) {
