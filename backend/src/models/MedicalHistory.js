@@ -3,9 +3,14 @@ const sequelize = require('../config/database');
 const Pet = require('./Pets');
 
 const AdoptionInfo = sequelize.define('AdoptionInfo', {
+    adoption_id: {
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
+        primaryKey: true,
+        field: 'adoption_id'
+    },
     petId: {
         type: DataTypes.UUID,
-        primaryKey: true,
         allowNull: false,
         references: {
             model: Pet,
@@ -14,25 +19,21 @@ const AdoptionInfo = sequelize.define('AdoptionInfo', {
         onDelete: 'CASCADE',
         field: 'petid'
     },
-    vetName: {
+    shelterName: {
         type: DataTypes.STRING,
-        field: 'vetname'
+        field: 'sheltername'
     },
-    officeName: {
+    shelterAddress: {
         type: DataTypes.STRING,
-        field: 'officename'
-    },
-    firstVisitDate: {
-        type: DataTypes.DATEONLY,
-        field: 'firstvisitdate'
-    },
-    lastVisitDate: {
-        type: DataTypes.DATEONLY,
-        field: 'lastvisitdate'
+        field: 'shelteraddress'
     },
     phoneNumber: {
         type: DataTypes.STRING,
         field: 'phonenumber'
+    },
+    adoptionDate: {
+        type: DataTypes.DATEONLY,
+        field: 'firstvisitdate'
     }
 }, {
     tableName: 'adoptioninfo',
