@@ -16,14 +16,14 @@ function SignIn() {
 
     const submitHandler = async (e) => {
         e.preventDefault();
-        console.log('REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
+        // console.log('REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/users/login`, {
                 email,
                 password,
             });
             const { userId, userName, userType, token } = response.data;
-            // console.log("Login response data:", { userId, userName, userType, token });
+            console.log("Login response data:", { userId, userName, userType, token });
 
             // Check for token in the response and store it in localStorage
             if (token) {

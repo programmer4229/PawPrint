@@ -1,7 +1,10 @@
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEye, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import SignIn from './SignIn';
+
 
 function Register() {
     const navigate = useNavigate();
@@ -9,6 +12,7 @@ function Register() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
     const [cfmpassword, setCfmPassword] = useState('');
     const [phone, setPhone] = useState('');
     const [address, setAddress] = useState('');
@@ -23,12 +27,38 @@ function Register() {
     const submitHandler = async (e) => {
         e.preventDefault();
 
+        // email validation regex
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            setMessage("Please enter a valid email address.");
+            return;
+        }
+
+        const rawPhone = phone.replace(/\D/g, ""); // Remove formatting to get raw digits
+        if (rawPhone.length < 10) {
+            setMessage("Phone number must be 10 digits long.");
+            return;
+        }
+
         if (password !== cfmpassword) {
             setMessage("Passwords do not match!");
             return;
         }
 
         try {
+            // Check email uniqueness
+            const checkEmailResponse = await fetch(`${process.env.REACT_APP_API_BASE_URL}/users/check-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email }),
+            });
+
+            if (!checkEmailResponse.ok) {
+                const errorData = await checkEmailResponse.json();
+                throw new Error(errorData.message || "Email is already linked to another account.");
+            }
+
+            // Proceed with registration if email is unique
             const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/users/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -62,8 +92,9 @@ function Register() {
                 <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md mt-16">
                     <h2 className="text-3xl font-bold text-orange-600 mb-6 text-center">Register</h2>
                     
+                    {/* Form fields */}
                     <form className="space-y-4" onSubmit={submitHandler}>
-                        {/* Form fields */}
+                        {/* Name Field */}
                         <div className="form-control">
                             <input 
                                 type="name" 
@@ -75,28 +106,73 @@ function Register() {
                             />
                         </div>
 
+                        {/* Email Field */}
                         <div className="form-control">
                             <input 
                                 type="email" 
                                 placeholder="Email" 
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
+                                onBlur={async (e) => {
+                                    try {
+                                        const response = await fetch(`${process.env.REACT_APP_API_BASE_URL}/users/check-email`, {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ email: e.target.value }),
+                                        });
+
+                                        if (!response.ok) {
+                                            const errorData = await response.json();
+                                            e.target.setCustomValidity(errorData.message || "Email is already linked to another account.");
+                                        } else {
+                                            e.target.setCustomValidity(""); // Clear the validation message if email is valid
+                                        }
+                                    } catch (error) {
+                                        console.error("Error checking email:", error);
+                                        e.target.setCustomValidity("Server error. Please try again.");
+                                    }
+                                }}
+                                onInput={(e) => e.target.setCustomValidity("")} // Clear the message while the user is typing
                                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 required
                             />
                         </div>
-
+                        
+                        {/* Phone Field */}
                         <div className="form-control">
                             <input 
                                 type="phone" 
                                 placeholder="Phone" 
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
+                                onChange={(e) => {
+                                    const rawValue = e.target.value.replace(/\D/g, ""); // Remove non-numeric characters
+                                    let formattedValue = rawValue;
+
+                                    // Format as (###) ###-####
+                                    if (rawValue.length > 3 && rawValue.length <= 6) {
+                                        formattedValue = `(${rawValue.slice(0, 3)}) ${rawValue.slice(3)}`;
+                                    } else if (rawValue.length > 6) {
+                                        formattedValue = `(${rawValue.slice(0, 3)}) ${rawValue.slice(3, 6)}-${rawValue.slice(6, 10)}`;
+                                    }
+
+                                    setPhone(formattedValue);
+                                }}
+                                onBlur={(e) => {
+                                    const rawValue = phone.replace(/\D/g, "");
+                                    if (rawValue.length < 10) {
+                                        e.target.setCustomValidity("Phone number must be 10 digits long.");
+                                    } else {
+                                        e.target.setCustomValidity(""); // Clear the message if valid
+                                    }
+                                }}
+                                onInput={(e) => e.target.setCustomValidity("")} // Clear the custom message when editing
+                                maxLength="14" // Max length for the formatted phone number
                                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 required
                             />
                         </div>
 
+                        {/* Address Field */}
                         <div className="form-control">
                             <input 
                                 type="address" 
@@ -108,6 +184,7 @@ function Register() {
                             />
                         </div>
 
+                        {/* User Type Field */}
                         {/* Dropdown for User Type */}
                         <div className="form-control">
                             <label htmlFor="userType" className="block text-sm font-medium text-gray-500">
@@ -115,38 +192,65 @@ function Register() {
                             </label>
                             <select
                                 name="userType"
-                                value={userType}
+                                value={userType}  // Default to "Owner" if no value is selected
                                 onChange={(e) => setUserType(e.target.value)}
                                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 required
                             >
+                                <option value="" disabled>-- Select a user type --</option> {/* Placeholder option */}
                                 <option value="Owner">Owner</option>
                                 <option value="Veterinarian">Veterinarian</option>
                             </select>
                         </div>
-
-                        <div className="form-control">
+                        
+                        {/* Password Field */}
+                        <div className="form-control relative">
+                            {/* Password Field */}
                             <input 
-                                type="password" 
+                                type={showPassword ? "text" : "password"} 
                                 placeholder="Password" 
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 required
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                            >
+                                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                            </button>
                         </div>
 
-                        <div className="form-control">
+                        <div className="form-control relative">
+                            {/* Confirm Password Field */}
                             <input 
-                                type="password" 
+                                type={showPassword ? "text" : "password"} 
                                 placeholder="Confirm Password" 
                                 value={cfmpassword}
-                                onChange={(e) => setCfmPassword(e.target.value)}
+                                onChange={(e) => {
+                                    setCfmPassword(e.target.value);
+                                    if (e.target.value !== password) {
+                                        e.target.setCustomValidity("Passwords do not match!");
+                                    } else {
+                                        e.target.setCustomValidity("");
+                                    }
+                                }}
+                                onInput={(e) => e.target.setCustomValidity("")} // Clear the validation message
                                 className="w-full px-4 py-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                                 required
                             />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                            >
+                                <FontAwesomeIcon icon={showPassword ? faEyeSlash : faEye} />
+                            </button>
                         </div>
                         
+                        {/* Submit Field */}
                         <button 
                             type="submit"
                             className="w-full bg-orange-500 text-white py-2 px-4 rounded-md hover:bg-orange-600 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-opacity-50"
