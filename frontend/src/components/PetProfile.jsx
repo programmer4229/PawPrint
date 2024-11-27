@@ -722,7 +722,11 @@ const PetProfile = () => {
                     <p><strong>Next Visit:</strong> {vetInfo?.nextVisitDate || <em>coming soon</em>}</p>
                   </div>
                 ) : (
-                  <p>No primary vet info available for {petData.name}. <br></br><em>(Hover to add)</em></p>
+                  isOwner ? (
+                    <p>No primary vet info available for {petData.name}. <br /><em>(Hover to add)</em></p>
+                  ) : (
+                    <p>No primary vet info available for {petData.name}.</p>
+                  )                
                 )}
                 
                 {/* Editable Form for Vet Info (Only for Owners) */}
@@ -812,7 +816,12 @@ const PetProfile = () => {
                       <p><strong>Phone Number:</strong> {adoptionInfo?.phoneNumber}</p>
                     </div>
                 ) : (
-                    <p>No adoption info available for {petData.name}. <br></br><em>(Hover to add)</em></p>
+                  isOwner ? (
+                    <p>No primary adoption info available for {petData.name}. <br /><em>(Hover to add)</em></p>
+                  ) : (
+                    <p>No primary adoption info available for {petData.name}.</p>
+                  )
+                
                 )}
 
                 {/* Editable Form for Adoption Info (Only for Owners) */}
