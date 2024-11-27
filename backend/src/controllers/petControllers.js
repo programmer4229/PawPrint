@@ -272,7 +272,17 @@ async function getVaccinations(req, res) {
     try {
         const vaccinations = await Vaccination.findAll({ where: { petId: req.params.id } });
         // console.log(vaccinations);
-        if (!vaccinations.length) return res.status(404).json({ message: "No vaccinations found" });
+
+        // pass empty data to avoid null info
+        if (!vaccinations) {
+            return res.status(200).json({
+                vaccinationName: 'N/A',
+                vaccinationDate: 'N/A',
+                vetName: 'N/A',
+                dueDate: 'N/A',
+            });
+        }
+        
         res.json(vaccinations);
     } catch (error) {
         console.error('Error fetching vaccinations:', error);
@@ -285,7 +295,20 @@ async function getMedications(req, res) {
     try {
         const medications = await Medication.findAll({ where: { petId: req.params.id } });
         // console.log(medications);
-        if (!medications.length) return res.status(404).json({ message: "No medications found" });
+        
+        // pass empty data to avoid null info
+        if (!medications) {
+            return res.status(200).json({
+                medicationName: 'N/A',
+                medicationDate: 'N/A',
+                vetName: 'N/A',
+                dueDate: 'N/A',
+                dosage: 'N/A',
+                frequency: 'N/A',
+                notes: 'N/A',
+            });
+        }
+        
         res.json(medications);
     } catch (error) {
         console.error('Error fetching medications:', error);

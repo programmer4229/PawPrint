@@ -117,19 +117,21 @@ const PetProfile = () => {
     try {
       const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/pets/adoption/${petId}`, {
         headers: {
-          'Authorization': `Bearer ${token}`
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          'userId': userId,
         }
       });
 
       setAdoptionInfo(response.data);
-      console.log("Fetched adoption info:", response.data);
+      // console.log("Fetched adoption info:", response.data);
     } catch (error) {
       console.error("Error fetching adoption info:", error);
       setAdoptionInfo(null);
     }
   };
 
-  // Fetch Adoption Info by ID
+  // Fetch Vet Info by ID
   const fecthVetInfo = async () => {
     const token = localStorage.getItem('token');
     try {
@@ -166,13 +168,8 @@ const PetProfile = () => {
       setVaccinations(response.data);
       // console.log("Fetched vaccinations:", response.data);
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.warn("No vaccinations found for this pet");
-        setVaccinations([]);
-      } else {
         console.error("Error fetching vaccinations:", error);
         setVaccinations([]);
-      }
     }
   };
 
@@ -190,13 +187,8 @@ const PetProfile = () => {
       setMedications(response.data);
       // console.log("Fetched medications:", response.data);
     } catch (error) {
-      if (error.response && error.response.status === 404) {
-        console.warn("No medications found for this pet");
-        setMedications([]);
-      } else {
         console.error("Error fetching medications:", error);
         setMedications([]);
-      }
     }
   };
 
@@ -624,7 +616,7 @@ const PetProfile = () => {
           <div className={`relative w-32 h-32 rounded-full overflow-hidden mb-4 group cursor-pointer 
             ${isOwner ? 'border-orange-500' : 'border-purple-500'} border-4`}
             // only owner can upload a profile pic for this pet
-          onClick={isOwner ? openUploadModal : undefined}
+            onClick={isOwner ? openUploadModal : undefined}
           >
             <img
               src={
@@ -707,186 +699,186 @@ const PetProfile = () => {
           <div>
             <div className="grid grid-cols-2 gap-6 mb-6">
               <div className="group">
-              <div className="flex items-center space-x-3">
-                <h3 className="text-lg font-semibold">Primary Vet Information</h3>
-                  {/* Edit Button (for owners only) */}
-                  {isOwner && !isEditingVetInfo && (
-    <div
-    className="bg-white p-1 rounded-full shadow-md cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-    onClick={() => setIsEditingVetInfo(true)}
->
-    <FaPencilAlt className="text-orange-500" />
-</div>
-                  )}
-</div>
-
-                    {/* Display Primary Vet Info */}
-                    {!isEditingVetInfo && vetInfo.vetName !== 'N/A' ? (
-                      <div className="mt-2">
-                        <p><strong>Primary Vet:</strong> {vetInfo?.vetName}</p>
-                        <p><strong>Office Address:</strong> {vetInfo?.officeAddress}</p>
-                        <p><strong>Phone:</strong> {vetInfo?.phoneNumber}</p>
-                        <p><strong>Last Visit:</strong> {vetInfo?.lastVisitDate || <em>coming soon</em>}</p>
-                        <p><strong>Next Visit:</strong> {vetInfo?.nextVisitDate || <em>coming soon</em>}</p>
+                <div className="flex items-center space-x-3">
+                  <h3 className="text-lg font-semibold">Primary Vet Information</h3>
+                    {/* Edit Button (for owners only) */}
+                    {isOwner && !isEditingVetInfo && (
+                      <div
+                          className="bg-white p-1 rounded-full shadow-md cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => setIsEditingVetInfo(true)}
+                      >
+                        <FaPencilAlt className="text-orange-500" />
                       </div>
-                    ) : (
-                      <p>No primary vet info available for {petData.name}.</p>
                     )}
-                    
-                    {/* Editable Form for Vet Info (Only for Owners) */}
-                    {isEditingVetInfo && isOwner && (
-                      <form onSubmit={handleVetInfoSubmit} className="mt-4 space-y-4">
+                </div>
+
+                {/* Display Primary Vet Info */}
+                {!isEditingVetInfo && vetInfo?.vetName !== 'N/A' ? (
+                  <div className="mt-2">
+                    <p><strong>Primary Vet:</strong> {vetInfo?.vetName}</p>
+                    <p><strong>Office Address:</strong> {vetInfo?.officeAddress}</p>
+                    <p><strong>Phone:</strong> {vetInfo?.phoneNumber}</p>
+                    <p><strong>Last Visit:</strong> {vetInfo?.lastVisitDate || <em>coming soon</em>}</p>
+                    <p><strong>Next Visit:</strong> {vetInfo?.nextVisitDate || <em>coming soon</em>}</p>
+                  </div>
+                ) : (
+                  <p>No primary vet info available for {petData.name}. <br></br><em>(Hover to add)</em></p>
+                )}
+                
+                {/* Editable Form for Vet Info (Only for Owners) */}
+                {isEditingVetInfo && isOwner && (
+                  <form onSubmit={handleVetInfoSubmit} className="mt-4 space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Vet Name</label>
+                      <input
+                        type="text"
+                        value={vetInfo.vetName === 'N/A' ? '' : vetInfo.vetName} // Clear value if 'N/A'
+                        onChange={(e) => setVetInfo({ ...vetInfo, vetName: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-md"
+                        placeholder={vetInfo.vetName === 'N/A' ? 'Enter Vet Name (eg.: John Doe)' : ''} // Show placeholder if 'N/A'
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Phone Number</label>
+                      <input
+                        type="text"
+                        value={vetInfo.phoneNumber === 'N/A' ? '' : vetInfo.phoneNumber}
+                        onChange={(e) => {
+                          const formattedNumber = formatPhoneNumber(e.target.value);
+                          setVetInfo({ ...vetInfo, phoneNumber: formattedNumber });
+                        }}                        
+                        className="w-full px-3 py-2 border rounded-md"
+                        placeholder={vetInfo.phoneNumber === 'N/A' ? 'Enter Phone Number' : ''}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Office Address</label>
+                      <input
+                        type="text"
+                        value={vetInfo.officeAddress === 'N/A' ? '' : vetInfo.officeAddress}
+                        onChange={(e) => setVetInfo({ ...vetInfo, officeAddress: e.target.value })}
+                        className="w-full px-3 py-2 border rounded-md"
+                        placeholder={vetInfo.officeAddress === 'N/A' ? 'Enter Office Address' : ''}
+                      />
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex space-x-4">
+                      <button
+                        type="submit"
+                        className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsEditingVetInfo(false)}
+                        className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+              
+              {/* Adoption Info Section */}
+              <div className="group">
+                <div className="flex items-center space-x-3">
+                  <h3 className="text-lg font-semibold">Adoption Information</h3>
+                  {isOwner && !isEditingAdoptionInfo && (
+                  <div
+                    className="bg-white p-1 rounded-full shadow-md cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
+                    onClick={() => setIsEditingAdoptionInfo(true)}
+                  >
+                      <FaPencilAlt className="text-orange-500" />
+                  </div>
+
+                      )}
+                </div>
+
+                {/* Display Adoption Info */}
+                {!isEditingAdoptionInfo && adoptionInfo?.shelterName !== 'N/A' ? (
+                    <div className="mt-2">
+                      <p><strong>Adoption Date:</strong>{' '}
+                        {adoptionInfo?.adoptionDate
+                          ? new Date(adoptionInfo.adoptionDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
+                          : 'N/A'}
+                      </p>
+                      <p><strong>Shelter:</strong> {adoptionInfo?.shelterName}</p>
+                      <p><strong>Address:</strong> {adoptionInfo?.shelterAddress}</p>
+                      <p><strong>Phone Number:</strong> {adoptionInfo?.phoneNumber}</p>
+                    </div>
+                ) : (
+                    <p>No adoption info available for {petData.name}. <br></br><em>(Hover to add)</em></p>
+                )}
+
+                {/* Editable Form for Adoption Info (Only for Owners) */}
+                {isEditingAdoptionInfo && isOwner && (
+                    <form onSubmit={handleAdoptionInfoSubmit} className="mt-4 space-y-4">
                         <div>
-                          <label className="block text-sm font-medium text-gray-700">Vet Name</label>
-                          <input
-                            type="text"
-                            value={vetInfo.vetName === 'N/A' ? '' : vetInfo.vetName} // Clear value if 'N/A'
-                            onChange={(e) => setVetInfo({ ...vetInfo, vetName: e.target.value })}
-                            className="w-full px-3 py-2 border rounded-md"
-                            placeholder={vetInfo.vetName === 'N/A' ? 'Enter Vet Name (eg.: John Doe)' : ''} // Show placeholder if 'N/A'
-                          />
+                            <label className="block text-sm font-medium text-gray-700">Adoption Date</label>
+                            <input
+                                type="date"
+                                value={adoptionInfo.adoptionDate === 'N/A' ? '' : adoptionInfo.adoptionDate}
+                                onChange={(e) => setAdoptionInfo({ ...adoptionInfo, adoptionDate: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-md"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Shelter Name</label>
+                            <input
+                                type="text"
+                                value={adoptionInfo.shelterName === 'N/A' ? '' : adoptionInfo.shelterName}
+                                onChange={(e) => setAdoptionInfo({ ...adoptionInfo, shelterName: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-md"
+                            />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700">Shelter Address</label>
+                            <input
+                                type="text"
+                                value={adoptionInfo.shelterAddress === 'N/A' ? '' : adoptionInfo.shelterAddress}
+                                onChange={(e) => setAdoptionInfo({ ...adoptionInfo, shelterAddress: e.target.value })}
+                                className="w-full px-3 py-2 border rounded-md"
+                            />
                         </div>
 
                         <div>
                           <label className="block text-sm font-medium text-gray-700">Phone Number</label>
                           <input
                             type="text"
-                            value={vetInfo.phoneNumber === 'N/A' ? '' : vetInfo.phoneNumber}
+                            value={adoptionInfo.phoneNumber === 'N/A' ? '' : adoptionInfo.phoneNumber}
                             onChange={(e) => {
                               const formattedNumber = formatPhoneNumber(e.target.value);
-                              setVetInfo({ ...vetInfo, phoneNumber: formattedNumber });
+                              setAdoptionInfo({ ...adoptionInfo, phoneNumber: formattedNumber });
                             }}                        
                             className="w-full px-3 py-2 border rounded-md"
                             placeholder={vetInfo.phoneNumber === 'N/A' ? 'Enter Phone Number' : ''}
                           />
                         </div>
 
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700">Office Address</label>
-                          <input
-                            type="text"
-                            value={vetInfo.officeAddress === 'N/A' ? '' : vetInfo.officeAddress}
-                            onChange={(e) => setVetInfo({ ...vetInfo, officeAddress: e.target.value })}
-                            className="w-full px-3 py-2 border rounded-md"
-                            placeholder={vetInfo.officeAddress === 'N/A' ? 'Enter Office Address' : ''}
-                          />
-                        </div>
-
-                        {/* Buttons */}
                         <div className="flex space-x-4">
-                          <button
-                            type="submit"
-                            className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
-                          >
-                            Save
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setIsEditingVetInfo(false)}
-                            className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                          >
-                            Cancel
-                          </button>
+                            <button type="submit" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
+                                Save
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsEditingAdoptionInfo(false)}
+                                className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                            >
+                                Cancel
+                            </button>
                         </div>
-                      </form>
-                    )}
+                    </form>
+                )}
               </div>
-              
-<div className="group">
-  <div className="flex items-center space-x-3">
-    <h3 className="text-lg font-semibold">Adoption Information</h3>
-    {isOwner && !isEditingAdoptionInfo && (
-    <div
-    className="bg-white p-1 rounded-full shadow-md cursor-pointer opacity-0 group-hover:opacity-100 transition-opacity"
-    onClick={() => setIsEditingAdoptionInfo(true)}
->
-    <FaPencilAlt className="text-orange-500" />
-</div>
-
-    )}
-</div>
-
-    {/* Display Adoption Info */}
-    {!isEditingAdoptionInfo && adoptionInfo.shelterName !== 'N/A' ? (
-        <div className="mt-2">
-          <p><strong>Adoption Date:</strong>{' '}
-            {adoptionInfo?.adoptionDate
-              ? new Date(adoptionInfo.adoptionDate).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' })
-              : 'N/A'}
-          </p>
-          <p><strong>Shelter:</strong> {adoptionInfo?.shelterName}</p>
-          <p><strong>Address:</strong> {adoptionInfo?.shelterAddress}</p>
-          <p><strong>Phone Number:</strong> {adoptionInfo?.phoneNumber}</p>
-        </div>
-    ) : (
-        <p>No adoption info available for {petData.name}.</p>
-    )}
-
-    {/* Editable Form for Adoption Info (Only for Owners) */}
-    {isEditingAdoptionInfo && isOwner && (
-        <form onSubmit={handleAdoptionInfoSubmit} className="mt-4 space-y-4">
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Adoption Date</label>
-                <input
-                    type="date"
-                    value={adoptionInfo.adoptionDate === 'N/A' ? '' : adoptionInfo.adoptionDate}
-                    onChange={(e) => setAdoptionInfo({ ...adoptionInfo, adoptionDate: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md"
-                />
             </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Shelter Name</label>
-                <input
-                    type="text"
-                    value={adoptionInfo.shelterName === 'N/A' ? '' : adoptionInfo.shelterName}
-                    onChange={(e) => setAdoptionInfo({ ...adoptionInfo, shelterName: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md"
-                />
-            </div>
-
-            <div>
-                <label className="block text-sm font-medium text-gray-700">Shelter Address</label>
-                <input
-                    type="text"
-                    value={adoptionInfo.shelterAddress === 'N/A' ? '' : adoptionInfo.shelterAddress}
-                    onChange={(e) => setAdoptionInfo({ ...adoptionInfo, shelterAddress: e.target.value })}
-                    className="w-full px-3 py-2 border rounded-md"
-                />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Phone Number</label>
-              <input
-                type="text"
-                value={adoptionInfo.phoneNumber === 'N/A' ? '' : adoptionInfo.phoneNumber}
-                onChange={(e) => {
-                  const formattedNumber = formatPhoneNumber(e.target.value);
-                  setAdoptionInfo({ ...adoptionInfo, phoneNumber: formattedNumber });
-                }}                        
-                className="w-full px-3 py-2 border rounded-md"
-                placeholder={vetInfo.phoneNumber === 'N/A' ? 'Enter Phone Number' : ''}
-              />
-            </div>
-
-            <div className="flex space-x-4">
-                <button type="submit" className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">
-                    Save
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setIsEditingAdoptionInfo(false)}
-                    className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                >
-                    Cancel
-                </button>
-            </div>
-        </form>
-    )}
-</div>
-
-
-            </div>
+            
             {/* Vaccines Section */}
             <div>
               <h3 className="text-lg font-semibold mb-2">Vaccines</h3>
@@ -914,6 +906,7 @@ const PetProfile = () => {
               )}
             </div>
             <br></br>
+
             {/* Medications Section */}
             <div>
               <h3 className="text-lg font-semibold mb-2">Medications</h3>
