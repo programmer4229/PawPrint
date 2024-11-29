@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import groupPetImage from './biggrouppets.jpg';
-import recordsFeatureImage from './recordsFeature.jpeg';
+import recordsFeatureImage from './recordsFeature.png';
 import weightFeature from './weightFeature.png';
 import servicesFeature from './servicesFeature.png';
 
